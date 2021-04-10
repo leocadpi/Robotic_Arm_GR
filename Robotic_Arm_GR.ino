@@ -1,7 +1,7 @@
 #include "MeMegaPi.h"
 #include <Servo.h>
 // Leo gayyyyyyyyy
-
+//vicky marica
 MePort limitSwitch(PORT_7);
 Servo svs[1] = {Servo()};
 MeStepperOnBoard steppers[3] = {MeStepperOnBoard(PORT_1),MeStepperOnBoard(PORT_2),MeStepperOnBoard(PORT_3)}; 
