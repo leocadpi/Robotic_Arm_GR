@@ -40,7 +40,7 @@ void setSpeed(float speed);
 
 int testSpeed = 200;
 int testAcceleration = 300;
-int currentSpeed = 350;
+int currentSpeed = 400;
 int maxSpeed = 500;
 int currentAcceleration = 1000;
 int pin1, pin2;
