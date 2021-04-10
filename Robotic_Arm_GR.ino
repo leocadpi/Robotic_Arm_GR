@@ -1,3 +1,5 @@
+#include "MatrixMath.h"
+#include <Math.h>
 #include "MeMegaPi.h"
 #include <Servo.h>
 
