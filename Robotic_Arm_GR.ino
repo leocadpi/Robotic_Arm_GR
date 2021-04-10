@@ -3,6 +3,7 @@
 #include "MeMegaPi.h"
 #include <Servo.h>
 
+
 MePort limitSwitch(PORT_7);
 Servo svs[1] = {Servo()};
 MeStepperOnBoard steppers[3] = {MeStepperOnBoard(PORT_1),MeStepperOnBoard(PORT_2),MeStepperOnBoard(PORT_3)}; 
@@ -128,7 +129,6 @@ void parseBuffer() {
 
   bool openEnable = false;
   bool closeEnable = false;
-  bool reset1Enable = false;
   
   //Filtrado del mensaje por el puerto serie
   while (true) {
@@ -146,8 +146,6 @@ void parseBuffer() {
     }
     else if(tmp.indexOf("close",0)>-1){
       closeEnable = true;
-    } else if(tmp.indexOf("reset1",0)>-1){
-     reset1Enable = true;
     }
     count++;
     
@@ -160,8 +158,6 @@ void parseBuffer() {
      close_grip();
   }else if(openEnable){
      open_grip();
-  } else if(reset1Enable){
-    reset_stepper0();
   }
 
   Serial.println("OK");
@@ -206,49 +202,58 @@ float stringToFloat(String s){
 
 //Busqueda de límites del robot
 
+//comento a fondo la función del q1, pero las de q2 y q3 son practicamente 
+//iguales asi que no doy mucho detalle salvo un par de diferencias pequeñas
+
 //Límites eje 1 - establecerlo en -90,90
 void reset_stepper0(){
+  //Variables para contar los pasos que da el motor
   int cuenta_pasos1 = 0;
   int cuenta_pasos2 = 0;
-   float cuenta_pasos1_grad = 0;
+  //Lo mismo pero pasado a grados 
+  float cuenta_pasos1_grad = 0;
   float cuenta_pasos2_grad = 0;
   bool final_1 = true;
   bool final_2 = true;
   steppers[0].setSpeed(testSpeed);
   
-  while(final_1){
-    if(cuenta_pasos1 < 500){
-       steppers[0].step();
+  while(final_1){//mientras no se llegue a los 90 grados que pide
+    
+    if(cuenta_pasos1_grad < 90.0*GEAR_1*STEPS){//comprueba los grados pero añadiendo la fórmula de conversion al engranaje dentado
+       steppers[0].step(); //damos un paso
       delay(10);
-      cuenta_pasos1++;
-      cuenta_pasos1_grad = (float)cuenta_pasos1 * 1.8;
+      cuenta_pasos1++; //lo contamos
+      cuenta_pasos1_grad = (float)cuenta_pasos1 * 1.8; //lo pasamos a grados
     }
-    else{
-      qlimit_0[0] = cuenta_pasos1_grad/(GEAR_1*STEPS);
+    else{ //cuando llegamos al limite
+      qlimit_0[0] = cuenta_pasos1_grad/(GEAR_1*STEPS); //rellenamos el vector del primer limite de la variable
       Serial.println(qlimit_0[0]);
       final_1=false;
     }
   }
-  steppers[0].setSpeed(-testSpeed);
+  
+  steppers[0].setSpeed(-testSpeed); //velocidad de prueba pero negativa para movernos en el sentido contrario
   delay(2000);
   
-  while(final_2){
-    if(cuenta_pasos2 < 500){
+  while(final_2){ //misma condicion de antes pero ahora con -90
+    if(cuenta_pasos2_grad < 90.0*GEAR_1*STEPS){
        steppers[0].step();
       delay(10);
       cuenta_pasos2++;
       cuenta_pasos2_grad = (float)cuenta_pasos2 * 1.8;
     }
     else{
-      qlimit_0[1] = cuenta_pasos2_grad/(GEAR_1*STEPS);
+      qlimit_0[1] = -(cuenta_pasos2_grad - cuenta_pasos1_grad)/(GEAR_1*STEPS); //hacemos la resta de cuenta pasos 1 porque hay que tener
+      //en cuenta que partimos desde la posicion de 90 grados, asi que si no lo hiciermos el motor solo iria hasta la posicion inicial
+      
       Serial.println(qlimit_0[1]);
       final_2=false;
     }
   }
 
-  steppers[0].setCurrentPosition(-(cuenta_pasos2-cuenta_pasos1));
+  steppers[0].setCurrentPosition(-(cuenta_pasos2-cuenta_pasos1)); //para saber donde estamos
   delay(1000);
-  move_q1(0.0);
+  move_q1(0.0); //nos movemos a la posicion inicial 0.0
   delay(1000);
 }
 
@@ -261,7 +266,9 @@ void reset_stepper1(){
   bool exit1=true;
   bool exit2=true;
   
-  while(exit1){
+  while(exit1){ //en este caso ponemos el limite cuando pulsemos el final de carrera
+    //con lo cual la condición es distinta, aparte de eso, el esquema de la funcion es igual al de q1 y q3
+    //cambiando los indices de los vectores asociado de steppers o qlimits
     if(digitalRead(pin1)==LOW){
       steppers[1].step();
       delay(10);
@@ -367,6 +374,9 @@ void move_q1(float q1){
     //actualizar el vector lastPosition con los pasos calculados
     lastPositions[0] += q_pasos;
     steppers[0].setCurrentPosition(lastPositions[0]);
+  }
+  else{
+    Serial.println("Out of limits");
   }
  
 
