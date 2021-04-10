@@ -31,6 +31,10 @@ const double L3 = 200.0;
 const double Tz = -45.0;
 const double Tx = 65.0;
 
+float T_0_1[4][4];
+float T_1_2[4][4];
+float T_2_3[4][4];
+
 String buffer = "";
 bool endMoving = true;
 int sensor1, sensor2;
@@ -360,9 +364,9 @@ bool dentroLimites(float q){
 //Las funciones que mueven los ejes del robot
 void move_q1(float q1){
   //Comprobar que q1 está en los límites establecidos
-	//Paso de grados q1 a pasos
-	//Uso de la función steppers[n].moveTo(steps) para mover el eje
-	//Actualizar el vector lastPositions con los pasos calculados
+  //Paso de grados q1 a pasos
+  //Uso de la función steppers[n].moveTo(steps) para mover el eje
+  //Actualizar el vector lastPositions con los pasos calculados
   
   int q_pasos;
   bool in;
@@ -370,6 +374,7 @@ void move_q1(float q1){
   //Comprobar q1 está en los límites establecidos
   in = dentroLimites(q1);
   if(in == true){
+    steppers[0].setSpeed(currentSpeed);
     //paso de grados a pasos
     q_pasos = q1 / 1.8;
     //uso de la función steppers[n].moveTo(steps) para mover el eje
@@ -398,14 +403,53 @@ void moveToAngles(float q1, float q2, float q3){
 }
 
 //Función que devuelve la matriz de transformación T entre Si-1 y Si
-void denavit(float q, float d, float a, float alfa)
+/*float denavit(float q, float d, float a, float alfa)
 {
+  float T[][4] = {
+   {cos(q), -cos(alfa)*sin(q) ,sin(alfa)*sin(q), a*cos(q)},
+   {sin(q), cos(alfa)*cos(q), -sin(alfa)*cos(q), a*sin(q)},
+   {0.0, sin(alfa), cos(alfa), d},
+   {0.0, 0.0, 0.0, 1.0}
+  };
+  return T;
+}*/
 
+//No se si va, de momento la función lo que hace es recibir la matriz 4x4
+//T1, 2, o 3 junto con los parametros que se calcularon de la tabla denavit
+void denavit(float q, float d, float a, float alfa, float t[4][4])
+{
+    float t1[4][4] = {
+   {cos(q), -cos(alfa)*sin(q) ,sin(alfa)*sin(q), a*cos(q)},
+   {sin(q), cos(alfa)*cos(q), -sin(alfa)*cos(q), a*sin(q)},
+   {0.0, sin(alfa), cos(alfa), d},
+   {0.0, 0.0, 0.0, 1.0}
+  };
+  t = t1;
 }
 
 //Función que utiliza la función denavit para calcular 0T3 (de la base al extremo 3)
+
 Vector3 forwardKinematics (float q1, float q2, float q3){
+  Vector3 elpepe;
+  float q[3] ={q1, q2-90, q2-q3};    //vector donde estan las variables q denavit
+  float d[3]= {L1, 0, 0};            //vector de variables d
+  float a[3] = {0, L2, L3};          //vector de variables a
+  float alf[3] = {-90, 0, 0};        //vector de variables alfa
+
+  //Llamamos a la funcion denavit pasandole cada matriz para que la modifique las matrices
+  denavit(q[0], d[0], a[0], alf[0], T_0_1);
+  denavit(q[1], d[1], a[1], alf[1], T_1_2);
+  denavit(q[2], d[2], a[2], alf[2], T_2_3);
+  float T_0_3[4][4];                            // Esta es la matriz que queremos
+  float T_0_2[4][4];                            //Esta es para el resultado de la multiplicacion intermedia
   
+  Matrix.Multiply((float*)T_0_1, (float*)T_1_2, 4, 4, 4, (float*)T_0_2); //primera pultiplicacion de t1 y t2
+  Matrix.Multiply((float*)T_0_2, (float*)T_2_3, 4, 4, 4, (float*)T_0_3); //segundo multiplicacion del resultado anterior por t3
+  
+  elpepe.x = T_0_3[0][3];                //igualamos las tres variables internas 
+  elpepe.y = T_0_3[1][3];                //del struct al resultado del vector de traslación de nuestra matriz 0T3
+  elpepe.z = T_0_3[2][3];
+  return elpepe;                        //devolvemos el struct de tipo vector3
 }
 
 //******Cinemática inversa. Movimiento en x,y,z******//
