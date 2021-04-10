@@ -198,7 +198,7 @@ float stringToFloat(String s){
 }
 
 
-//******FUNCIONES A IMPLEMENTAR POR EL GRUPO DE ALUMNOS****//
+//******FUNCIONES A IMPLEMENTAR POR EL GRUPO DE ALUMNOS******//
 
 //Busqueda de límites del robot
 
@@ -210,6 +210,7 @@ void reset_stepper0(){
   //Variables para contar los pasos que da el motor
   int cuenta_pasos1 = 0;
   int cuenta_pasos2 = 0;
+  
   //Lo mismo pero pasado a grados 
   float cuenta_pasos1_grad = 0;
   float cuenta_pasos2_grad = 0;
@@ -217,10 +218,9 @@ void reset_stepper0(){
   bool final_2 = true;
   steppers[0].setSpeed(testSpeed);
   
-  while(final_1){//mientras no se llegue a los 90 grados que pide
-    
-    if(cuenta_pasos1_grad < 90.0*GEAR_1*STEPS){//comprueba los grados pero añadiendo la fórmula de conversion al engranaje dentado
-       steppers[0].step(); //damos un paso
+  while(final_1){ //mientras no se llegue a los 90 grados que pide
+    if(cuenta_pasos1_grad < 90.0*GEAR_1*STEPS){ //comprueba los grados pero añadiendo la fórmula de conversion al engranaje dentado
+      steppers[0].step(); //damos un paso
       delay(10);
       cuenta_pasos1++; //lo contamos
       cuenta_pasos1_grad = (float)cuenta_pasos1 * 1.8; //lo pasamos a grados
@@ -237,7 +237,7 @@ void reset_stepper0(){
   
   while(final_2){ //misma condicion de antes pero ahora con -90
     if(cuenta_pasos2_grad < 90.0*GEAR_1*STEPS){
-       steppers[0].step();
+      steppers[0].step();
       delay(10);
       cuenta_pasos2++;
       cuenta_pasos2_grad = (float)cuenta_pasos2 * 1.8;
@@ -245,7 +245,6 @@ void reset_stepper0(){
     else{
       qlimit_0[1] = -(cuenta_pasos2_grad - cuenta_pasos1_grad)/(GEAR_1*STEPS); //hacemos la resta de cuenta pasos 1 porque hay que tener
       //en cuenta que partimos desde la posicion de 90 grados, asi que si no lo hiciermos el motor solo iria hasta la posicion inicial
-      
       Serial.println(qlimit_0[1]);
       final_2=false;
     }
@@ -346,20 +345,26 @@ void reset_stepper2(){
   delay(1000);
 }
 
-
-
-//Punto inicial y vuelta a la posición de home
+//Punto inicial
 void setHome(){
  
 }
 
+//Vuelta a la posición de home
 void goHome(){
 
 }
 
+//******Cinemática directa. Movimiento en q1,q2,q3******//
 
-//Cinemática directa. Movimiento en q1,q2,q3
-//Cinemática directa. Movimiento en q1,q2,q3
+//Función comprueba si estamos dentro de los límites
+//Si al sumarle la posición seguimos dentro de los límites devolverá true
+bool dentroLimites(float q){
+ float posActual = steppers[0].currentPosition() *1.8;
+ return q + posActual < qlimit_0[0] && q + posActual > qlimit_0[1];
+}
+
+//Las funciones que mueven los ejes del robot
 void move_q1(float q1){
   int q_pasos;
   bool in;
@@ -378,16 +383,6 @@ void move_q1(float q1){
   else{
     Serial.println("Out of limits");
   }
- 
-
-}
-
-//Función comprueba si estamos dentro de los límites
-//Si al sumarle la posición seguimos dentro de los límites devolverá true
-bool dentroLimites(float q){
- float posActual = steppers[0].currentPosition() *1.8;
- 
-  return q + posActual < qlimit_0[0] && q + posActual > qlimit_0[1];
 }
 
 void move_q2(float q2){
@@ -399,15 +394,25 @@ void move_q3(float q3){
 }
 
 void moveToAngles(float q1, float q2, float q3){
-  
+  move_q1(q1);
+  move_q2(q2);
+  move_q3(q3);
 }
 
+//Función que devuelve la matriz de transformación T entre Si-1 y Si
+void denavit(float q, float d, float a, float alfa)
+{
+
+}
+
+//Función que utiliza la función denavit para calcular 0T3 (de la base al extremo 3)
 Vector3 forwardKinematics (float q1, float q2, float q3){
   
 }
 
 
-//Cinemática inversa. Movimiento en x,y,z
+//******Cinemática inversa. Movimiento en x,y,z******//
+
 void moveToPoint(float x,float y,float z){
  
 }
@@ -416,12 +421,12 @@ Vector3 inverseKinematics(float x,float y,float z){
  
 }
 
-
-//Trayectoria y tarea p&p
+//Trayectoria
 void trajectory (float q1, float q2, float q3, float t){
   
 }
 
+//Tarea Pick&Place (p&p)
 void pick_and_place (){
 
 }
