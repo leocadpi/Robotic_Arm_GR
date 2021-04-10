@@ -1,7 +1,5 @@
 #include "MeMegaPi.h"
 #include <Servo.h>
-// Leo gayyyyyyyyy
-// Muuuuy gay
 
 MePort limitSwitch(PORT_7);
 Servo svs[1] = {Servo()};
