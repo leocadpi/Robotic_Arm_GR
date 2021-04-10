@@ -1,7 +1,7 @@
 #include "MeMegaPi.h"
 #include <Servo.h>
+// Github no mola(((
 
-//baam bu
 
 MePort limitSwitch(PORT_7);
 Servo svs[1] = {Servo()};
