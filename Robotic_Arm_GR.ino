@@ -3,7 +3,6 @@
 #include "MeMegaPi.h"
 #include <Servo.h>
 
-
 MePort limitSwitch(PORT_7);
 Servo svs[1] = {Servo()};
 MeStepperOnBoard steppers[3] = {MeStepperOnBoard(PORT_1),MeStepperOnBoard(PORT_2),MeStepperOnBoard(PORT_3)}; 
@@ -23,8 +22,8 @@ float lastPositions[3] = {0,0,0};
 const double RADS = PI / 180.0;
 const double DEGS = 180.0 / PI;
 const int STEPS = 2;
-const int GEAR_1 = 9;
-const int GEAR_2 = 7;
+const int GEAR_1 = 9; //Motor base
+const int GEAR_2 = 7; //Otros dos motores
 
 const double L1 = 150.0; 
 const double L2 = 155.0; 
@@ -73,7 +72,6 @@ void setup() {
   
 }
 
-
 void loop() {
 
   //Lectura del puerto serie y filtrado del comando
@@ -92,14 +90,13 @@ void loop() {
   sensor2 = digitalRead(pin2);
   Serial.println(sensor2);
 
-
   //Permito corriente a los motores en un movimiento
   long isMoving = 0;
   for(int i=0;i<3;i++){
-      isMoving += abs(steppers[i].distanceToGo());
-      steppers[i].run();
+      isMoving += abs(steppers[i].distanceToGo()); //Mide la distancia
+      steppers[i].run(); //Activa el motor
   }
-  if(isMoving>0){
+  if(isMoving>0){ //Si la distancia es mayor que 0
       endMoving = true;
   }
   else{
@@ -152,19 +149,17 @@ void parseBuffer() {
     if (endIndex == len - 1) break;
   }
 
-
   //Acciones a realizar tras el filtrado del puerto serie
   if(closeEnable){
      close_grip();
-  }else if(openEnable){
+  }
+  else if(openEnable){
      open_grip();
   }
 
-  Serial.println("OK");
+  Serial.println("OK"); //Está filtrado
   buffer = "";
 }
-
-
 
 //Establecer velocidad de los motores
 void setSpeedConfiguration(float c_speed, float max_speed, float accel){
@@ -174,7 +169,6 @@ void setSpeedConfiguration(float c_speed, float max_speed, float accel){
         steppers[i].setAcceleration(accel);
     }
 }
-
 
 //Apertura y cierre de la pinza
 void runServo(int index,int angle){
@@ -196,7 +190,6 @@ float stringToFloat(String s){
   float f = atof(s.c_str());
   return f;
 }
-
 
 //******FUNCIONES A IMPLEMENTAR POR EL GRUPO DE ALUMNOS******//
 
@@ -366,6 +359,11 @@ bool dentroLimites(float q){
 
 //Las funciones que mueven los ejes del robot
 void move_q1(float q1){
+  //Comprobar que q1 está en los límites establecidos
+	//Paso de grados q1 a pasos
+	//Uso de la función steppers[n].moveTo(steps) para mover el eje
+	//Actualizar el vector lastPositions con los pasos calculados
+  
   int q_pasos;
   bool in;
  
@@ -409,7 +407,6 @@ void denavit(float q, float d, float a, float alfa)
 Vector3 forwardKinematics (float q1, float q2, float q3){
   
 }
-
 
 //******Cinemática inversa. Movimiento en x,y,z******//
 
