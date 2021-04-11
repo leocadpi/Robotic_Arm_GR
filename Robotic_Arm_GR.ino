@@ -7,9 +7,9 @@ MePort limitSwitch(PORT_7);
 Servo svs[1] = {Servo()};
 MeStepperOnBoard steppers[3] = {MeStepperOnBoard(PORT_1), MeStepperOnBoard(PORT_2), MeStepperOnBoard(PORT_3)}; 
 
-float qlimit_0[2] = {0.0,0.0}; //ToDo
-float qlimit_1[2] = {0.0,0.0}; //ToDo
-float qlimit_2[2] = {0.0,0.0}; //ToDo
+float qlimit_0[2] = {0.0,0.0};
+float qlimit_1[2] = {0.0,0.0};
+float qlimit_2[2] = {0.0,0.0};
 
 struct Vector3 {
   double x;
@@ -21,8 +21,8 @@ float lastPositions[3] = {0,0,0};
 const double RADS = PI / 180.0;
 const double DEGS = 180.0 / PI;
 const int STEPS = 2;
-const int GEAR_1 = 9; //Motor base
-const int GEAR_2 = 7; //Otros dos motores
+const int GEAR_1 = 9; // Motor base
+const int GEAR_2 = 7; // Otros dos motores
 
 const double L1 = 150.0; 
 const double L2 = 155.0; 
@@ -50,10 +50,10 @@ int pin1, pin2;
 
 void setup() {
   
-  //Puerto serie
+  // Puerto serie
   Serial.begin(115200);
 
-  //Configuración motores paso a paso
+  // Configuración motores paso a paso
   setSpeedConfiguration(currentSpeed,maxSpeed,currentAcceleration);
   
   for (int i = 0; i < 3; i++) {
@@ -61,23 +61,23 @@ void setup() {
     steppers[i].enableOutputs();
   }
 
-  //Sensores finales de carrera
+  // Sensores finales de carrera
   pin1 = limitSwitch.pin1();
   pin2 = limitSwitch.pin2();
   pinMode(pin1, INPUT_PULLUP);
   pinMode(pin2, INPUT_PULLUP);
   
-  //Pinza. Configuración servo 
+  // Pinza. Configuración servo 
   svs[0].attach(A8);
   open_grip();
   delay(1000);
   close_grip();
-  
+
 }
 
 void loop() {
 
-  //Lectura del puerto serie y filtrado del comando
+  // Lectura del puerto serie y filtrado del comando
   if (Serial.available()) {
     char c = Serial.read();
       if (c == '\n') {
@@ -88,21 +88,21 @@ void loop() {
       }
   }
 
-  //Visualización finales de carrera
+  // Visualización finales de carrera
   sensor1 = digitalRead(pin1);
   Serial.println(sensor1);
   sensor2 = digitalRead(pin2);
   Serial.println(sensor2);
 
-  //Permito corriente a los motores en un movimiento
+  // Permito corriente a los motores en un movimiento
   long isMoving = 0;
 
   for (int i = 0; i < 3; i++) {
-      isMoving += abs(steppers[i].distanceToGo()); //Mide la distancia
-      steppers[i].run(); //Activa el motor
+      isMoving += abs(steppers[i].distanceToGo()); // Mide la distancia
+      steppers[i].run(); // Activa el motor
   }
 
-  if (isMoving > 0) { //Si la distancia es mayor que 0
+  if (isMoving > 0) { // Si la distancia es mayor que 0
       endMoving = true;
   }
   else {
@@ -135,7 +135,7 @@ void parseBuffer() {
   bool openEnable = false;
   bool closeEnable = false;
   
-  //Filtrado del mensaje por el puerto serie
+  // Filtrado del mensaje por el puerto serie
   while (true) {
     startIndex = buffer.indexOf(" ", endIndex);
     endIndex = buffer.indexOf(" ", startIndex + 1);
@@ -158,7 +158,7 @@ void parseBuffer() {
       break;
   }
 
-  //Acciones a realizar tras el filtrado del puerto serie
+  // Acciones a realizar tras el filtrado del puerto serie
   if (closeEnable) {
     close_grip();
   }
@@ -166,11 +166,11 @@ void parseBuffer() {
     open_grip();
   }
 
-  Serial.println("OK"); //Está filtrado
+  Serial.println("OK"); // Está filtrado
   buffer = "";
 }
 
-//Establecer velocidad de los motores
+// Establecer velocidad de los motores
 void setSpeedConfiguration(float c_speed, float max_speed, float accel) {
     for (int i=0;i<3;i++) {
       steppers[i].setSpeed(c_speed);
@@ -179,7 +179,7 @@ void setSpeedConfiguration(float c_speed, float max_speed, float accel) {
     }
 }
 
-//Apertura y cierre de la pinza
+// Apertura y cierre de la pinza
 void runServo(int index, int angle) {
   svs[index].write(angle);
 }
@@ -194,52 +194,51 @@ void open_grip() {
   delay(100);
 }
 
-//Transformación de String a float
+// Transformación de String a float
 float stringToFloat(String s) {
   float f = atof(s.c_str());
   return f;
 }
 
-//******FUNCIONES A IMPLEMENTAR POR EL GRUPO DE ALUMNOS******//
 
-//Busqueda de límites del robot
 
-//-------------------------------------------------------------------------
-//Comento a fondo la función del q1, pero las de q2 y q3 son practicamente 
-//iguales asi que no doy mucho detalle salvo un par de diferencias pequeñas
-//-------------------------------------------------------------------------
+//**************** FUNCIONES A IMPLEMENTAR POR EL GRUPO DE ALUMNOS ****************//
 
-//Límites eje 1 - establecerlo en -90,90
+// Límites eje 1 - [-90, 90]
 void reset_stepper0() {
-  //Variables para contar los pasos que da el motor
+
+  /* Comento a fondo la función del q1, pero las de q2 y q3 son practicamente 
+  iguales asi que no doy mucho detalle salvo un par de diferencias pequeñas */
+
+  // Variables para contar los pasos que da el motor
   int cuenta_pasos1 = 0;
   int cuenta_pasos2 = 0;
   
-  //Lo mismo pero pasado a grados 
+  // Lo mismo pero pasado a grados 
   float cuenta_pasos1_grad = 0;
   float cuenta_pasos2_grad = 0;
   bool final_1 = true;
   bool final_2 = true;
   steppers[0].setSpeed(testSpeed);
   
-  while (final_1) { //mientras no se llegue a los 90 grados que pide
-    if (cuenta_pasos1_grad < 90.0*GEAR_1*STEPS) { //comprueba los grados pero añadiendo la fórmula de conversion al engranaje dentado
+  while (final_1) { // Mientras no se llegue a los 90 grados que pide
+    if (cuenta_pasos1_grad < 90.0*GEAR_1*STEPS) { // Comprueba los grados pero añadiendo la fórmula de conversion al engranaje dentado
       steppers[0].step(); //damos un paso
       delay(10);
-      cuenta_pasos1++; //lo contamos
-      cuenta_pasos1_grad = (float)cuenta_pasos1 * 1.8; //lo pasamos a grados
+      cuenta_pasos1++; // Lo contamos
+      cuenta_pasos1_grad = (float)cuenta_pasos1 * 1.8; // Lo pasamos a grados
     }
-    else { //cuando llegamos al limite
-      qlimit_0[0] = cuenta_pasos1_grad/(GEAR_1*STEPS); //rellenamos el vector del primer limite de la variable
+    else { // Cuando llegamos al limite
+      qlimit_0[0] = cuenta_pasos1_grad/(GEAR_1*STEPS); // Rellenamos el vector del primer limite de la variable
       Serial.println(qlimit_0[0]);
       final_1 = false;
     }
   }
   
-  steppers[0].setSpeed(-testSpeed); //velocidad de prueba pero negativa para movernos en el sentido contrario
+  steppers[0].setSpeed(-testSpeed); // Velocidad de prueba pero negativa para movernos en el sentido contrario
   delay(2000);
   
-  while (final_2){ //misma condicion de antes pero ahora con -90
+  while (final_2){ // Misma condicion de antes pero ahora con -90
     if (cuenta_pasos2_grad < 90.0*GEAR_1*STEPS) {
       steppers[0].step();
       delay(10);
@@ -247,36 +246,51 @@ void reset_stepper0() {
       cuenta_pasos2_grad = (float)cuenta_pasos2 * 1.8;
     }
     else {
-      qlimit_0[1] = -(cuenta_pasos2_grad-cuenta_pasos1_grad)/(GEAR_1*STEPS); //hacemos la resta de cuenta pasos 1 porque hay que tener
-      //en cuenta que partimos desde la posicion de 90 grados, asi que si no lo hiciermos el motor solo iria hasta la posicion inicial
+      qlimit_0[1] = -(cuenta_pasos2_grad-cuenta_pasos1_grad)/(GEAR_1*STEPS);
+      /*
+      Hacemos la resta de cuenta pasos 1 porque hay que tener en cuenta que
+      partimos desde la posicion de 90 grados, asi que si no lo hiciermos el
+      motor solo iria hasta la posicion inicial
+      */
       Serial.println(qlimit_0[1]);
       final_2 = false;
     }
   }
 
-  steppers[0].setCurrentPosition(-(cuenta_pasos2-cuenta_pasos1)); //para saber donde estamos
+  steppers[0].setCurrentPosition(-(cuenta_pasos2-cuenta_pasos1)); // Para saber donde estamos
   delay(1000);
-  move_q1(0.0); //nos movemos a la posicion inicial 0.0
+  move_q1(0.0); // Nos movemos a la posicion inicial 0.0
   delay(1000);
 }
 
-//Límites eje 2 - ejemplo
+// Límites eje 2 - ejemplo
 void reset_stepper1() {
   
+  // Contadores
   int count_steps1 = 0;
   int count_steps2 = 0;
+
+  // Establecemos la velocidad
   steppers[1].setSpeed(testSpeed);
+
+  // Variables boooleanas
   bool exit1 = true;
   bool exit2 = true;
   
-  while (exit1) { //en este caso ponemos el limite cuando pulsemos el final de carrera
-    //con lo cual la condición es distinta, aparte de eso, el esquema de la funcion es igual al de q1 y q3
-    //cambiando los indices de los vectores asociado de steppers o qlimits
+  /*
+  En este caso ponemos el limite cuando pulsemos el final de carrera con lo cual
+  la condición es distinta, aparte de eso, el esquema de la funcion es igual al
+  de q1 y q3 cambiando los indices de los vectores asociado de steppers o qlimits
+  */
+
+  while (exit1) {
+    //  Si el sensor de final de carrera está apagado
     if (digitalRead(pin1) == LOW) {
-      steppers[1].step();
-      delay(10);
+      steppers[1].step(); // Da un paso de motor
+      delay(10); // Espera de 10ms entre cada paso
       count_steps1++;
     }
+    // Si el sensor de final de carrera se enciende
     else {
       qlimit_1[0] = count_steps1*1.8/(GEAR_2*STEPS);
       Serial.println(qlimit_1[0]);
@@ -284,6 +298,7 @@ void reset_stepper1() {
     }
   }
   
+  // Establecemos la velocidad en el sentido contrario
   steppers[1].setSpeed(-testSpeed);
   delay(2000);
   
@@ -306,7 +321,7 @@ void reset_stepper1() {
   delay(1000);
 }
 
-//Límites eje 3
+// Límites eje 3
 void reset_stepper2() {
 
   int count_steps1 = 0;
@@ -350,26 +365,28 @@ void reset_stepper2() {
   delay(1000);
 }
 
-//Punto inicial
+// Punto inicial
 void setHome() {
  
 }
 
-//Vuelta a la posición de home
+// Vuelta a la posición de home
 void goHome() {
 
 }
 
-//******Cinemática directa. Movimiento en q1,q2,q3******//
 
-//Función comprueba si estamos dentro de los límites
-//Si al sumarle la posición seguimos dentro de los límites devolverá true
+
+//***************** Cinemática directa. Movimiento en q1, q2, q3 *****************//
+
+// Función comprueba si estamos dentro de los límites
 bool dentroLimites(float q) {
+  // Si al sumarle la posición seguimos dentro de los límites devolverá true
   float posActual = steppers[0].currentPosition() * 1.8;
   return q + posActual < qlimit_0[0] && q + posActual > qlimit_0[1];
 }
 
-//Las funciones que mueven los ejes del robot
+// Las funciones que mueven los ejes del robot
 void move_q1(float q1) {
   //Comprobar que q1 está en los límites establecidos
   //Paso de grados q1 a pasos
@@ -410,20 +427,7 @@ void moveToAngles(float q1, float q2, float q3) {
   move_q3(q3);
 }
 
-//Función que devuelve la matriz de transformación T entre Si-1 y Si
-/*float denavit(float q, float d, float a, float alfa)
-{
-  float T[][4] = {
-   {cos(q), -cos(alfa)*sin(q) ,sin(alfa)*sin(q), a*cos(q)},
-   {sin(q), cos(alfa)*cos(q), -sin(alfa)*cos(q), a*sin(q)},
-   {0.0, sin(alfa), cos(alfa), d},
-   {0.0, 0.0, 0.0, 1.0}
-  };
-  return T;
-}*/
-
-//No se si va, de momento la función lo que hace es recibir la matriz 4x4
-//T1, 2, o 3 junto con los parametros que se calcularon de la tabla denavit
+// Función que devuelve la matriz de transformación T entre Si-1 y Si
 void denavit(float q, float d, float a, float alfa, float t[4][4]) {
   float t1[4][4] = {
     {cos(q), -cos(alfa)*sin(q) ,sin(alfa)*sin(q), a*cos(q)},
@@ -434,8 +438,22 @@ void denavit(float q, float d, float a, float alfa, float t[4][4]) {
   t = t1;
 }
 
-//Función que utiliza la función denavit para calcular 0T3 (de la base al extremo 3)
+// No se si va, de momento la función lo que hace es recibir la matriz 4x4
+// T1, 2, o 3 junto con los parametros que se calcularon de la tabla denavit
+/*
+float denavit(float q, float d, float a, float alfa)
+{
+  float T[][4] = {
+   {cos(q), -cos(alfa)*sin(q) ,sin(alfa)*sin(q), a*cos(q)},
+   {sin(q), cos(alfa)*cos(q), -sin(alfa)*cos(q), a*sin(q)},
+   {0.0, sin(alfa), cos(alfa), d},
+   {0.0, 0.0, 0.0, 1.0}
+  };
+  return T;
+}
+*/
 
+//Función que utiliza la función denavit para calcular 0T3 (de la base al extremo 3)
 Vector3 forwardKinematics (float q1, float q2, float q3) {
   Vector3 elpepe;
   float q[3] ={q1, q2-90, q2-q3};    //vector donde estan las variables q denavit
@@ -460,22 +478,31 @@ Vector3 forwardKinematics (float q1, float q2, float q3) {
   return elpepe;                        //devolvemos el struct de tipo vector3
 }
 
-//******Cinemática inversa. Movimiento en x,y,z******//
 
+
+//***************** Cinemática inversa. Movimiento en x, y, z *****************//
+
+// Lleva el extremo a una posición cartesiana x, y, z determinada
 void moveToPoint(float x, float y, float z) {
  
 }
 
+// Devuelve los valores articulares del robot
 Vector3 inverseKinematics(float x, float y, float z) {
  
 }
 
-//Trayectoria
+// Trayectoria
+// Mueve el robot a una posición articular (q1, q2, q3)
+// El movimiento de los ejes es síncrono, es decir, que todos los ejes lleguen a su destino
+// en el mismo tiempo
 void trajectory (float q1, float q2, float q3, float t) {
   
 }
 
-//Tarea p&p
+// Tarea p&p
+// Realiza una tarea de coger y mover un objeto mediante las funciones desarrolladas
+// en los apartados anteriores
 void pick_and_place () {
 
 }
