@@ -434,9 +434,19 @@ void setHome() {
 
 // Vuelta a la posición de home
 void goHome() {
-  move_q1(positionHome[0]);
-  move_q2(positionHome[1]);
-  move_q3(positionHome[2]);
+  /*
+    Las funciones move_qx, mueven n grados una articulación, por lo que hay que calcular la diferencia que hay entre la posición actual y la home
+    Además, estas funciones trabajan en grados por lo que hay que pasar las posiciones de home y de current a grados
+  */
+  
+  float p1,p2,p3;
+  p1 = positionHome[0] - steppers[1].currentPosition();
+  p2 = positionHome[1] - steppers[2].currentPosition();
+  p3 = positionHome[2] - steppers[3].currentPosition();
+    
+  move_q1(p1*1.8);
+  move_q2(p2*1.8);
+  move_q3(p3*1.8);
 }
 
 //***************** Cinemática directa. Movimiento en q1, q2, q3 *****************//
