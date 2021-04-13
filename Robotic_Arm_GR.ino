@@ -461,6 +461,8 @@ void move_q1(float q1) {
   // Si está dentro
   if (in == true) {
     steppers[0].setSpeed(currentSpeed);                 // Establecemos la velocidad
+    steppers[0].setMaxSpeed(maxSpeed);                  // ???
+    steppers[0].setAcceleration(currentAcceleration);   // ???
     q_pasos = q1 / 1.8;                                 // Paso de grados q1 a pasos
     steppers[0].moveTo(q_pasos);                        // Movemos el eje
     lastPositions[0] += q_pasos;                        // Actualizamos el vector lastPosition con los pasos calculados
@@ -483,6 +485,8 @@ void move_q2(float q2) {
   // Si está dentro
   if (in == true) {
     steppers[1].setSpeed(currentSpeed);                 // Establecemos la velocidad
+    steppers[1].setMaxSpeed(maxSpeed);                  // ???
+    steppers[1].setAcceleration(currentAcceleration);   // ???
     q_pasos = q2 / 1.8;                                 // Paso de grados q1 a pasos
     steppers[1].moveTo(q_pasos);                        // Movemos el eje
     lastPositions[1] += q_pasos;                        // Actualizamos el vector lastPosition con los pasos calculados
@@ -505,6 +509,8 @@ void move_q3(float q3) {
   // Si está dentro
   if (in == true) {
     steppers[2].setSpeed(currentSpeed);               // Establecemos la velocidad
+    steppers[2].setMaxSpeed(maxSpeed);                  // ???
+    steppers[2].setAcceleration(currentAcceleration);   // ???
     q_pasos = q3 / 1.8;                               // Paso de grados q1 a pasos
     steppers[2].moveTo(q_pasos);                      // Movemos el eje
     lastPositions[2] += q_pasos;                      // Actualizamos el vector lastPosition con los pasos calculados
