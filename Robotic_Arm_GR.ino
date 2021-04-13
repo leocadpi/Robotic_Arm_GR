@@ -20,6 +20,7 @@ struct Vector3 {
 };
 
 float lastPositions[3] = {0,0,0};
+float positionHome[3] = {0,0,0};
 const double RADS = PI / 180.0;
 const double DEGS = 180.0 / PI;
 const int STEPS = 2; // Micropasos/paso ???
@@ -388,7 +389,7 @@ void reset_stepper2() {
   delay(1000);
 }
 
-// Punto inicial
+// Punto inicial leido por buffer
 void setHome() {
 
   String cadena_leida = "";
@@ -415,13 +416,27 @@ void setHome() {
 
   for (int i = 0; i < 3; i++) {
     steppers[i].setCurrentPosition(angulos[i] / 1.8);
+    positionHome[i] = angulos[i] / 1.8;
   }
 
 }
 
+/*
+// Punto inicial a través de la posición actual
+void setHome() {
+  
+  for (int i = 0; i < 3; i++) {
+    positionHome[i] = steppers[i].currentPosition();
+  }
+
+}
+*/
+
 // Vuelta a la posición de home
 void goHome() {
-
+  move_q1(positionHome[0]);
+  move_q2(positionHome[1]);
+  move_q3(positionHome[2]);
 }
 
 //***************** Cinemática directa. Movimiento en q1, q2, q3 *****************//
