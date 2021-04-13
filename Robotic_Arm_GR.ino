@@ -418,7 +418,6 @@ void goHome() {
 
 }
 
-
 //***************** Cinemática directa. Movimiento en q1, q2, q3 *****************//
 
 // Funciones que comprueban si estamos dentro de los límites
