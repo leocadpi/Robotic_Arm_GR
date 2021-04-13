@@ -388,20 +388,20 @@ void setHome() {
   String cadena_leida = "";
 
   // Leemos la cadena del monitor
-  if (Serial.availible() > 0) {                                     // Comprobamos si en el buffer hay datos
+  if (Serial.available() > 0) {                                     // Comprobamos si en el buffer hay datos
     do {
       char caracter_leido = Serial.read();                          // Lee cada carácter uno por uno y se almacena en una variable
       cadena_leida += caracter_leido;                               // Introduce el caracter leído en la cadena 
       delay(5);
-    } while (Serial.availible() > 0);
+    } while (Serial.available() > 0);
   }
   
   // Sacamos los valores de ángulos
   float angulos[3] = {0.0, 0.0, 0.0};                               // Array para guardar los valores de los ángulos
-  separador = ' ';                                                  // Espacio como separador
+  char separador = ' ';                                                  // Espacio como separador
   int index;                                                        // Para la posición de los espacios en el String
 
-  for (int i = 0; i < length(cadena_leida); i++) {
+  for (int i = 0; i < cadena_leida.length(); i++) {
     index = cadena_leida.indexOf(separador);                        // Localizamos espacios dentro de la cadena (desde el pricipio)
     angulos[i] = stringToFloat(cadena_leida.substring(0, index));   // Sacamos parte de la cadena desde 0 hasta el espacio encontrado NO INCLUIDO
     cadena_leida = cadena_leida.substring(index + 1);               // Quitamos el espacio junto con la parte antes del mismo
@@ -529,14 +529,13 @@ void moveToAngles(float q1, float q2, float q3) {
 }
 
 // Función que devuelve la matriz de transformación T entre Si-1 y Si
-void denavit(float q, float d, float a, float alfa, float t[4][4]) {
+void denavit(float q, float d, float a, float alfa, float t[][4]) {
 
-  float t[4][4] = { {cos(q), -cos(alfa)*sin(q) ,sin(alfa)*sin(q), a*cos(q)},
-                    {sin(q), cos(alfa)*cos(q), -sin(alfa)*cos(q), a*sin(q)},
-                    {0.0, sin(alfa), cos(alfa), d},
-                    {0.0, 0.0, 0.0, 1.0} };
-  // t = t1;
-
+  t[4][4] = { {cos(q), -cos(alfa)*sin(q) ,sin(alfa)*sin(q), a*cos(q)},
+              {sin(q), cos(alfa)*cos(q), -sin(alfa)*cos(q), a*sin(q)},
+              {0.0, sin(alfa), cos(alfa), d},
+              {0.0, 0.0, 0.0, 1.0} };
+  
 }
 
 // No se si va, de momento la función lo que hace es recibir la matriz 4x4
@@ -557,26 +556,26 @@ float denavit(float q, float d, float a, float alfa) {
 // Función que utiliza la función denavit para calcular 0T3 (de la base al extremo 3)
 Vector3 forwardKinematics (float q1, float q2, float q3) {
   Vector3 elpepe;
-  float q[3] ={q1, q2-90, q2-q3};                                         // Vector donde estan las variables q denavit
-  float d[3]= {L1, 0, 0};                                                 // Vector de variables d
-  float a[3] = {0, L2, L3};                                               // Vector de variables a
-  float alf[3] = {-90, 0, 0};                                             // Vector de variables alfa
+  float q[3] ={q1, q2-90, q2-q3};                                             // Vector donde estan las variables q denavit
+  float d[3]= {L1, 0, 0};                                                     // Vector de variables d
+  float a[3] = {0, L2, L3};                                                   // Vector de variables a
+  float alf[3] = {-90, 0, 0};                                                 // Vector de variables alfa
 
   // Llamamos a la funcion denavit pasandole cada matriz para que la modifique las matrices
   denavit(q[0], d[0], a[0], alf[0], T_0_1);
   denavit(q[1], d[1], a[1], alf[1], T_1_2);
   denavit(q[2], d[2], a[2], alf[2], T_2_3);
-  float T_0_3[4][4];                                                      // Esta es la matriz que queremos
-  float T_0_2[4][4];                                                      // Esta es para el resultado de la multiplicacion intermedia
+  float T_0_3[4][4];                                                          // Esta es la matriz que queremos
+  float T_0_2[4][4];                                                          // Esta es para el resultado de la multiplicacion intermedia
   
-  Matrix.Multiply((float*)T_0_1, (float*)T_1_2, 4, 4, 4, (float*)T_0_2);  // Primera pultiplicacion de t1 y t2
-  Matrix.Multiply((float*)T_0_2, (float*)T_2_3, 4, 4, 4, (float*)T_0_3);  // Segundo multiplicacion del resultado anterior por t3
+  Matrix.Multiply((double*)T_0_1, (double*)T_1_2, 4, 4, 4, (double*)T_0_2);   // Primera pultiplicacion de t1 y t2
+  Matrix.Multiply((double*)T_0_2, (double*)T_2_3, 4, 4, 4, (double*)T_0_3);   // Segundo multiplicacion del resultado anterior por t3
   
-  elpepe.x = T_0_3[0][3];                                                 // Igualamos las tres variables internas 
-  elpepe.y = T_0_3[1][3];                                                 // del struct al resultado del vector de traslación de nuestra matriz 0T3
+  elpepe.x = T_0_3[0][3];                                                     // Igualamos las tres variables internas 
+  elpepe.y = T_0_3[1][3];                                                     // del struct al resultado del vector de traslación de nuestra matriz 0T3
   elpepe.z = T_0_3[2][3];
 
-  return elpepe;                                                          // Devolvemos el struct de tipo vector3
+  return elpepe;                                                              // Devolvemos el struct de tipo vector3
 }
 
 
