@@ -531,13 +531,11 @@ void moveToAngles(float q1, float q2, float q3) {
 // Función que devuelve la matriz de transformación T entre Si-1 y Si
 void denavit(float q, float d, float a, float alfa, float t[4][4]) {
 
-  float t1[4][4] = {
-    {cos(q), -cos(alfa)*sin(q) ,sin(alfa)*sin(q), a*cos(q)},
-    {sin(q), cos(alfa)*cos(q), -sin(alfa)*cos(q), a*sin(q)},
-    {0.0, sin(alfa), cos(alfa), d},
-    {0.0, 0.0, 0.0, 1.0}
-  };
-  t = t1;
+  float t[4][4] = { {cos(q), -cos(alfa)*sin(q) ,sin(alfa)*sin(q), a*cos(q)},
+                    {sin(q), cos(alfa)*cos(q), -sin(alfa)*cos(q), a*sin(q)},
+                    {0.0, sin(alfa), cos(alfa), d},
+                    {0.0, 0.0, 0.0, 1.0} };
+  // t = t1;
 
 }
 
@@ -546,12 +544,10 @@ void denavit(float q, float d, float a, float alfa, float t[4][4]) {
 /*
 float denavit(float q, float d, float a, float alfa) {
 
-  float T[][4] = {
-   {cos(q), -cos(alfa)*sin(q) ,sin(alfa)*sin(q), a*cos(q)},
-   {sin(q), cos(alfa)*cos(q), -sin(alfa)*cos(q), a*sin(q)},
-   {0.0, sin(alfa), cos(alfa), d},
-   {0.0, 0.0, 0.0, 1.0}
-  };
+  float T[][4] = { {cos(q), -cos(alfa)*sin(q) ,sin(alfa)*sin(q), a*cos(q)},
+                   {sin(q), cos(alfa)*cos(q), -sin(alfa)*cos(q), a*sin(q)},
+                   {0.0, sin(alfa), cos(alfa), d},
+                   {0.0, 0.0, 0.0, 1.0} };
 
   return T;
 
