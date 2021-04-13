@@ -9,9 +9,9 @@ MePort limitSwitch(PORT_7);
 Servo svs[1] = {Servo()};
 MeStepperOnBoard steppers[3] = {MeStepperOnBoard(PORT_1), MeStepperOnBoard(PORT_2), MeStepperOnBoard(PORT_3)}; 
 
-float qlimit_0[2] = {0.0,0.0};
-float qlimit_1[2] = {0.0,0.0};
-float qlimit_2[2] = {0.0,0.0};
+float qlimit_0[2] = {0.0, 0.0};
+float qlimit_1[2] = {0.0, 0.0};
+float qlimit_2[2] = {0.0, 0.0};
 
 struct Vector3 {
   double x;
@@ -22,7 +22,7 @@ struct Vector3 {
 float lastPositions[3] = {0,0,0};
 const double RADS = PI / 180.0;
 const double DEGS = 180.0 / PI;
-const int STEPS = 2;
+const int STEPS = 2; // Micropasos/paso ???
 const int GEAR_1 = 9; // Motor base
 const int GEAR_2 = 7; // Otros dos motores
 
@@ -290,11 +290,9 @@ void reset_stepper1() {
   bool exit1 = true;
   bool exit2 = true;
   
-  /*
-  En este caso ponemos el limite cuando pulsemos el final de carrera con lo cual
+  /* En este caso ponemos el limite cuando pulsemos el final de carrera con lo cual
   la condición es distinta, aparte de eso, el esquema de la funcion es igual al
-  de q1 y q3 cambiando los indices de los vectores asociado de steppers o qlimits
-  */
+  de q1 y q3 cambiando los indices de los vectores asociado de steppers o qlimits */
 
   while (exit1) {
     //  Si el sensor de final de carrera está apagado
@@ -387,11 +385,37 @@ void reset_stepper2() {
 // Punto inicial
 void setHome() {
 
+  String cadena_leida = "";
+
+  // Leemos la cadena del monitor
+  if (Serial.availible() > 0) {                                     // Comprobamos si en el buffer hay datos
+    do {
+      char caracter_leido = Serial.read();                          // Lee cada carácter uno por uno y se almacena en una variable
+      cadena_leida += caracter_leido;                               // Introduce el caracter leído en la cadena 
+      delay(5);
+    } while (Serial.availible() > 0);
+  }
+  
+  // Sacamos los valores de ángulos
+  float angulos[3] = {0.0, 0.0, 0.0};                               // Array para guardar los valores de los ángulos
+  separador = ' ';                                                  // Espacio como separador
+  int index;                                                        // Para la posición de los espacios en el String
+
+  for (int i = 0; i < length(cadena_leida); i++) {
+    index = cadena_leida.indexOf(separador);                        // Localizamos espacios dentro de la cadena (desde el pricipio)
+    angulos[i] = stringToFloat(cadena_leida.substring(0, index));   // Sacamos parte de la cadena desde 0 hasta el espacio encontrado NO INCLUIDO
+    cadena_leida = cadena_leida.substring(index + 1);               // Quitamos el espacio junto con la parte antes del mismo
+  }
+
+  for (int i = 0; i < 3; i++) {
+    steppers[i].setCurrentPosition(angulos[i] / 1.8);
+  }
+
 }
 
 // Vuelta a la posición de home
 void goHome() {
-  
+
 }
 
 
