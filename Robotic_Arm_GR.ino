@@ -136,7 +136,7 @@ void parseBuffer() {
 
   bool openEnable = false;
   bool closeEnable = false;
-  
+  bool move2enable = false;
   // Filtrado del mensaje por el puerto serie
   while (true) {
     startIndex = buffer.indexOf(" ", endIndex);
@@ -154,6 +154,9 @@ void parseBuffer() {
     else if (tmp.indexOf("close", 0) > -1) {
       closeEnable = true;
     }
+    else if(tmp.indexOf("move2", 0) > -1){
+      move2enable = true;
+    }
     count++;
     
     if (endIndex == len - 1) 
@@ -166,6 +169,9 @@ void parseBuffer() {
   }
   else if (openEnable) {
     open_grip();
+  }
+   else if(move2enable){
+    move_q2(30);
   }
 
   Serial.println("OK"); // Está filtrado
