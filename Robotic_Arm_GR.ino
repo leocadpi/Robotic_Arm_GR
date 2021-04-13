@@ -233,7 +233,7 @@ void reset_stepper0() {
       steppers[0].step();                                   // Da un paso de motor
       delay(10);                                            // Espera de 10ms entre cada paso
       cuenta_pasos1++;                                      // Cuenta los pasos
-      cuenta_pasos1_grad = (float) cuenta_pasos1 * 1.8;     // Los pasos contados se pasan a grados
+      cuenta_pasos1_grad = (float)cuenta_pasos1 * 1.8;     // Los pasos contados se pasan a grados
     }
     // Cuando llegamos al limite
     else {
@@ -253,7 +253,7 @@ void reset_stepper0() {
       steppers[0].step();
       delay(10);
       cuenta_pasos2++;
-      cuenta_pasos2_grad = (float) cuenta_pasos2 * 1.8;
+      cuenta_pasos2_grad = (float)cuenta_pasos2 * 1.8;
     }
     else {
       qlimit_0[1] = -(cuenta_pasos2_grad - cuenta_pasos1_grad) / (GEAR_1 * STEPS);
@@ -531,7 +531,7 @@ void moveToAngles(float q1, float q2, float q3) {
 // Función que devuelve la matriz de transformación T entre Si-1 y Si
 void denavit(float q, float d, float a, float alfa, float t[][4]) {
 
-  t[4][4] = { {cos(q), -cos(alfa)*sin(q) ,sin(alfa)*sin(q), a*cos(q)},
+  t[4][4] = { {cos(q), -cos(alfa)*sin(q), sin(alfa)*sin(q), a*cos(q)},
               {sin(q), cos(alfa)*cos(q), -sin(alfa)*cos(q), a*sin(q)},
               {0.0, sin(alfa), cos(alfa), d},
               {0.0, 0.0, 0.0, 1.0} };
@@ -555,9 +555,10 @@ float denavit(float q, float d, float a, float alfa) {
 
 // Función que utiliza la función denavit para calcular 0T3 (de la base al extremo 3)
 Vector3 forwardKinematics (float q1, float q2, float q3) {
+
   Vector3 elpepe;
-  float q[3] ={q1, q2-90, q2-q3};                                             // Vector donde estan las variables q denavit
-  float d[3]= {L1, 0, 0};                                                     // Vector de variables d
+  float q[3] = {q1, q2-90, q2-q3};                                            // Vector donde estan las variables q denavit
+  float d[3] = {L1, 0, 0};                                                    // Vector de variables d
   float a[3] = {0, L2, L3};                                                   // Vector de variables a
   float alf[3] = {-90, 0, 0};                                                 // Vector de variables alfa
 
@@ -576,6 +577,7 @@ Vector3 forwardKinematics (float q1, float q2, float q3) {
   elpepe.z = T_0_3[2][3];
 
   return elpepe;                                                              // Devolvemos el struct de tipo vector3
+
 }
 
 
@@ -588,7 +590,31 @@ void moveToPoint(float x, float y, float z) {
 
 // Devuelve los valores articulares del robot
 Vector3 inverseKinematics(float x, float y, float z) {
- 
+
+  // Función int Invert(mtx_type* A, int n);
+
+  Vector3 resultado;
+
+  float q1, q2, q3;
+
+
+
+
+  //////////////////////////////////////////////////// Sacado de internet :) A ver si sirve
+  // Q = q1 + q2 + q3
+
+  // q1 = arctg(y / x)
+  // q2 = beta - alfa
+  // q3 = arctg(± (1 - cos²(q3))½ / cos(q3))
+
+  // R = sqrt(x^2 + y^2)
+
+  // beta = arctg(z / R)
+  // alfa = arctg(L3 * sin(q3) / (L2 + L3 * cos(q3)))
+  ////////////////////////////////////////////////////
+
+  return resultado;
+
 }
 
 // Trayectoria
