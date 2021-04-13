@@ -531,10 +531,11 @@ void moveToAngles(float q1, float q2, float q3) {
 // Función que devuelve la matriz de transformación T entre Si-1 y Si
 void denavit(float q, float d, float a, float alfa, float t[][4]) {
 
-  t[4][4] = { {cos(q), -cos(alfa)*sin(q), sin(alfa)*sin(q), a*cos(q)},
+  float t1[4][4] = { {cos(q), -cos(alfa)*sin(q), sin(alfa)*sin(q), a*cos(q)},
               {sin(q), cos(alfa)*cos(q), -sin(alfa)*cos(q), a*sin(q)},
               {0.0, sin(alfa), cos(alfa), d},
               {0.0, 0.0, 0.0, 1.0} };
+  t = t1;
   
 }
 
@@ -551,7 +552,7 @@ float denavit(float q, float d, float a, float alfa) {
   return T;
 
 }
-*/
+
 
 // Función que utiliza la función denavit para calcular 0T3 (de la base al extremo 3)
 Vector3 forwardKinematics (float q1, float q2, float q3) {
@@ -580,7 +581,7 @@ Vector3 forwardKinematics (float q1, float q2, float q3) {
 
 }
 
-
+*/
 //***************** Cinemática inversa. Movimiento en x, y, z *****************//
 
 // Lleva el extremo a una posición cartesiana x, y, z determinada
@@ -600,7 +601,7 @@ Vector3 inverseKinematics(float x, float y, float z) {
 
 
 
-  //////////////////////////////////////////////////// Sacado de internet :) A ver si sirve
+  //////////////////////////////////////////////////// ???
   // Q = q1 + q2 + q3
 
   // q1 = arctg(y / x)
@@ -622,7 +623,7 @@ Vector3 inverseKinematics(float x, float y, float z) {
 // El movimiento de los ejes es síncrono, es decir, que todos los ejes lleguen a su destino
 // en el mismo tiempo
 void trajectory (float q1, float q2, float q3, float t) {
-  
+  // moveToAngles(q1, q2, q3); ???
 }
 
 // Tarea p&p
