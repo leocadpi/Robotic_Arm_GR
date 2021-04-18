@@ -517,7 +517,7 @@ void move_q1(float q1) {
     steppers[0].setSpeed(currentSpeed);                 // Establecemos la velocidad
     //steppers[0].setMaxSpeed(maxSpeed);                  // ???
     //steppers[0].setAcceleration(currentAcceleration);   // ???
-    q_pasos = q1 / 1.8;                                 // Paso de grados q1 a pasos
+    q_pasos = q1 (GEAR_1 * STEPS)/ 1.8;                                 // Paso de grados q1 a pasos
     steppers[0].moveTo(q_pasos);                        // Movemos el eje
     lastPositions[0] += q_pasos;                        // Actualizamos el vector lastPosition con los pasos calculados
     steppers[0].setCurrentPosition(lastPositions[0]);   // Establecemos la posición actual del motor
@@ -541,7 +541,7 @@ void move_q2(float q2) {
     steppers[1].setSpeed(currentSpeed);                 // Establecemos la velocidad
     //steppers[1].setMaxSpeed(maxSpeed);                  // ???
     //steppers[1].setAcceleration(currentAcceleration);   // ???
-    q_pasos = q2 / 1.8;                                 // Paso de grados q1 a pasos
+    q_pasos = q2 * (GEAR_2 * STEPS)/ 1.8;                                 // Paso de grados q1 a pasos
     steppers[1].moveTo(q_pasos);                        // Movemos el eje
     lastPositions[1] += q_pasos;                        // Actualizamos el vector lastPosition con los pasos calculados
     steppers[1].setCurrentPosition(lastPositions[1]);   // Establecemos la posición actual del motor
@@ -565,7 +565,7 @@ void move_q3(float q3) {
     steppers[2].setSpeed(currentSpeed);               // Establecemos la velocidad
     //steppers[2].setMaxSpeed(maxSpeed);                  // ???
     //steppers[2].setAcceleration(currentAcceleration);   // ???
-    q_pasos = q3 / 1.8;                               // Paso de grados q1 a pasos
+    q_pasos = q3 * (GEAR_2 * STEPS)/ 1.8;                               // Paso de grados q1 a pasos
     steppers[2].moveTo(q_pasos);                      // Movemos el eje
     lastPositions[2] += q_pasos;                      // Actualizamos el vector lastPosition con los pasos calculados
     steppers[2].setCurrentPosition(lastPositions[2]); // Establecemos la posición actual del motor
