@@ -479,7 +479,7 @@ void goHome() {
 bool dentroLimites1(float q1) {
 
   // Variable de la posición actual
-  float posActual = steppers[0].currentPosition() * 1.8;
+  float posActual = steppers[0].currentPosition() * 1.8/ (GEAR_1 * STEPS);
   // Si al sumarle la posición seguimos dentro de los límites devolverá true
   return q1 + posActual < qlimit_0[0] && q1 + posActual > qlimit_0[1];
 
@@ -488,7 +488,7 @@ bool dentroLimites1(float q1) {
 bool dentroLimites2(float q2) {
 
   // Variable de la posición actual
-  float posActual = steppers[1].currentPosition() * 1.8;
+  float posActual = steppers[1].currentPosition() * 1.8/ (GEAR_2 * STEPS);
   // Si al sumarle la posición seguimos dentro de los límites devolverá true
   return q2 + posActual < qlimit_1[0] && q2 + posActual > qlimit_1[1];
 
@@ -497,7 +497,7 @@ bool dentroLimites2(float q2) {
 bool dentroLimites3(float q3) {
 
   // Variable de la posición actual
-  float posActual = steppers[2].currentPosition() * 1.8;
+  float posActual = steppers[2].currentPosition() * 1.8/ (GEAR_2 * STEPS);
   // Si al sumarle la posición seguimos dentro de los límites devolverá true
   return q3 + posActual < qlimit_2[0] && q3 + posActual > qlimit_2[1];
 
