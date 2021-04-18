@@ -20,7 +20,6 @@ struct Vector3 {
 };
 
 float lastPositions[3] = {0,0,0};
-float positionHome[3] = {0,0,0};
 const double RADS = PI / 180.0;
 const double DEGS = 180.0 / PI;
 const int STEPS = 2; // Micropasos/paso ???
@@ -91,12 +90,13 @@ void loop() {
       }
   }
 
+/*
   // Visualización finales de carrera
   sensor1 = digitalRead(pin1);
   Serial.println(sensor1);
   sensor2 = digitalRead(pin2);
   Serial.println(sensor2);
-
+*/
   // Permito corriente a los motores en un movimiento
   long isMoving = 0;
 
@@ -137,7 +137,15 @@ void parseBuffer() {
 
   bool openEnable = false;
   bool closeEnable = false;
+
+  bool reset1 = false;
+  bool reset2 = false;
+  bool reset3 = false;
+
+  bool move1enable = false;
   bool move2enable = false;
+  bool move3enable = false;
+
   // Filtrado del mensaje por el puerto serie
   while (true) {
     startIndex = buffer.indexOf(" ", endIndex);
@@ -155,9 +163,28 @@ void parseBuffer() {
     else if (tmp.indexOf("close", 0) > -1) {
       closeEnable = true;
     }
-    else if(tmp.indexOf("move2", 0) > -1){
+    /////////////////////////////////////////////
+    else if(tmp.indexOf("m1", 0) > -1){    // ??? 
+      move1enable = true;
+    }
+    else if(tmp.indexOf("m2", 0) > -1){    // ??? 
       move2enable = true;
     }
+    else if(tmp.indexOf("m3", 0) > -1){    // ??? 
+      move3enable = true;
+    }
+    /////////////////////////////////////////////
+    else if(tmp.indexOf("r1", 0) > -1) {
+      reset1 = true;
+    }
+    else if(tmp.indexOf("r2", 0) > -1) {
+      reset2 = true;
+    }
+    else if(tmp.indexOf("r3", 0) > -1) {
+      reset3 = true;
+    }
+    /////////////////////////////////////////////
+    
     count++;
     
     if (endIndex == len - 1) 
@@ -171,8 +198,29 @@ void parseBuffer() {
   else if (openEnable) {
     open_grip();
   }
-   else if(move2enable){
+
+  else if(move1enable){
+    move_q1(30);
+  }
+  
+  else if(move2enable){
     move_q2(30);
+  }
+
+  else if(move3enable){
+    move_q3(30);
+  }
+
+  else if(reset1){
+    reset_stepper0();
+  }
+
+  else if(reset2){
+    reset_stepper1();
+  }
+  
+  else if(reset3){
+    reset_stepper2();
   }
 
   Serial.println("OK"); // Está filtrado
@@ -389,7 +437,7 @@ void reset_stepper2() {
   delay(1000);
 }
 
-// Punto inicial leido por buffer
+// Punto inicial
 void setHome() {
 
   String cadena_leida = "";
@@ -416,37 +464,13 @@ void setHome() {
 
   for (int i = 0; i < 3; i++) {
     steppers[i].setCurrentPosition(angulos[i] / 1.8);
-    positionHome[i] = angulos[i] / 1.8;
   }
 
 }
-
-/*
-// Punto inicial a través de la posición actual
-void setHome() {
-  
-  for (int i = 0; i < 3; i++) {
-    positionHome[i] = steppers[i].currentPosition();
-  }
-
-}
-*/
 
 // Vuelta a la posición de home
 void goHome() {
-  /*
-    Las funciones move_qx, mueven n grados una articulación, por lo que hay que calcular la diferencia que hay entre la posición actual y la home
-    Además, estas funciones trabajan en grados por lo que hay que pasar las posiciones de home y de current a grados
-  */
-  
-  float p1,p2,p3;
-  p1 = positionHome[0] - steppers[1].currentPosition();
-  p2 = positionHome[1] - steppers[2].currentPosition();
-  p3 = positionHome[2] - steppers[3].currentPosition();
-    
-  move_q1(p1*1.8);
-  move_q2(p2*1.8);
-  move_q3(p3*1.8);
+
 }
 
 //***************** Cinemática directa. Movimiento en q1, q2, q3 *****************//
@@ -491,8 +515,8 @@ void move_q1(float q1) {
   // Si está dentro
   if (in == true) {
     steppers[0].setSpeed(currentSpeed);                 // Establecemos la velocidad
-    steppers[0].setMaxSpeed(maxSpeed);                  // ???
-    steppers[0].setAcceleration(currentAcceleration);   // ???
+    //steppers[0].setMaxSpeed(maxSpeed);                  // ???
+    //steppers[0].setAcceleration(currentAcceleration);   // ???
     q_pasos = q1 / 1.8;                                 // Paso de grados q1 a pasos
     steppers[0].moveTo(q_pasos);                        // Movemos el eje
     lastPositions[0] += q_pasos;                        // Actualizamos el vector lastPosition con los pasos calculados
@@ -515,8 +539,8 @@ void move_q2(float q2) {
   // Si está dentro
   if (in == true) {
     steppers[1].setSpeed(currentSpeed);                 // Establecemos la velocidad
-    steppers[1].setMaxSpeed(maxSpeed);                  // ???
-    steppers[1].setAcceleration(currentAcceleration);   // ???
+    //steppers[1].setMaxSpeed(maxSpeed);                  // ???
+    //steppers[1].setAcceleration(currentAcceleration);   // ???
     q_pasos = q2 / 1.8;                                 // Paso de grados q1 a pasos
     steppers[1].moveTo(q_pasos);                        // Movemos el eje
     lastPositions[1] += q_pasos;                        // Actualizamos el vector lastPosition con los pasos calculados
@@ -539,8 +563,8 @@ void move_q3(float q3) {
   // Si está dentro
   if (in == true) {
     steppers[2].setSpeed(currentSpeed);               // Establecemos la velocidad
-    steppers[2].setMaxSpeed(maxSpeed);                  // ???
-    steppers[2].setAcceleration(currentAcceleration);   // ???
+    //steppers[2].setMaxSpeed(maxSpeed);                  // ???
+    //steppers[2].setAcceleration(currentAcceleration);   // ???
     q_pasos = q3 / 1.8;                               // Paso de grados q1 a pasos
     steppers[2].moveTo(q_pasos);                      // Movemos el eje
     lastPositions[2] += q_pasos;                      // Actualizamos el vector lastPosition con los pasos calculados
@@ -562,9 +586,9 @@ void moveToAngles(float q1, float q2, float q3) {
 void denavit(float q, float d, float a, float alfa, float t[][4]) {
 
   float t1[4][4] = { {cos(q), -cos(alfa)*sin(q), sin(alfa)*sin(q), a*cos(q)},
-              {sin(q), cos(alfa)*cos(q), -sin(alfa)*cos(q), a*sin(q)},
-              {0.0, sin(alfa), cos(alfa), d},
-              {0.0, 0.0, 0.0, 1.0} };
+                   {sin(q), cos(alfa)*cos(q), -sin(alfa)*cos(q), a*sin(q)},
+                   {0.0, sin(alfa), cos(alfa), d},
+                   {0.0, 0.0, 0.0, 1.0} };
   t = t1;
   
 }
