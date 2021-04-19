@@ -517,7 +517,7 @@ void move_q1(float q1) {
     steppers[0].setSpeed(currentSpeed);                 // Establecemos la velocidad
     //steppers[0].setMaxSpeed(maxSpeed);                  // ???
     //steppers[0].setAcceleration(currentAcceleration);   // ???
-    q_pasos = q1 (GEAR_1 * STEPS)/ 1.8;                                 // Paso de grados q1 a pasos
+    q_pasos = q1 * (GEAR_1 * STEPS)/ 1.8;                                 // Paso de grados q1 a pasos
     steppers[0].moveTo(q_pasos);                        // Movemos el eje
     lastPositions[0] += q_pasos;                        // Actualizamos el vector lastPosition con los pasos calculados
     steppers[0].setCurrentPosition(lastPositions[0]);   // Establecemos la posición actual del motor
@@ -679,24 +679,25 @@ Vector3 inverseKinematics(float x, float y, float z) {
 void trajectory (float q1, float q2, float q3, float t) {
   
   float a1, a2, a3; //Esto es para las aceleraciones de cada motor
-  float d1,d2, d3        //Esto es para las distancias en pasos
+  float d1,d2, d3;        //Esto es para las distancias en pasos
   float v1, v2, v3;
   
   //Calculamos distancia en pasos
-  d1= (q1*(GEAR_1*STEPS)/1.8) - (steppers[0].currenPosition()); //Los pasos que
+  d1= (q1*(GEAR_1*STEPS)/1.8) - (steppers[0].currentPosition()); //Los pasos que
                                                                 //damos desde donde estamos
-  d2= (q2*(GEAR_2*STEPS)/1.8) - (steppers[1].currenPosition());
-  d3= (q3*(GEAR_2*STEPS)/1.8) - (steppers[2].currenPosition());                                                              
+  d2= (q2*(GEAR_2*STEPS)/1.8) - (steppers[1].currentPosition());
+  d3= (q3*(GEAR_2*STEPS)/1.8) - (steppers[2].currentPosition());                                                              
   //Calculamos las aceleraciones
-  a1 = (d1 - (float)currentSpeed *t))*(2/t^2);     //Formula a partir de la cinemática
-  a2 = (d2 - (float)currentSpeed *t))*(2/t^2);
-  a3 = (d3 - (float)currentSpeed *t))*(2/t^2);
+  a1 = (d1 - (float)currentSpeed *t)*(2/t^2);     //Formula a partir de la cinemática
+  a2 = (d2 - (float)currentSpeed *t)*(2/t^2);
+  a3 = (d3 - (float)currentSpeed *t)*(2/t^2);
+  
   //Calculamos las velocidades que se darian con esta aceleracion
   v1= (float)currentSpeed + a1*t; // La sacamos de cinemática 
   v2= (float)currentSpeed + a2*t;
   v3= (float)currentSpeed + a3*t;
   // Filtramos las aceleraciones                                                             
-   if(((a1 or a2 or a3) > (float)maxAceleration) or ((v1 or v2 or v3) > (float)maxSpeed)){ //Si las aceleraciones o velocidades superasen el maximo
+   if(((a1 or a2 or a3) > (float)maxAceleration) or ((v1 or v2 or v3) > (float)maxSpeed)){ //Si las aceleraciones o velocidades superasen el maximo(maxAceleration no existe)
     Serial.println("Debes darle más tiempo, no es tan rápido"); 
    }
    else{ //Si no pues seteamos la aceleracion y llamamos a move angles
