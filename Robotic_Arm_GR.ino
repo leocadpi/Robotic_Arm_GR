@@ -696,8 +696,8 @@ void trajectory (float q1, float q2, float q3, float t) {
   v2= (float)currentSpeed + a2*t;
   v3= (float)currentSpeed + a3*t;
   // Filtramos las aceleraciones                                                             
-   if(((a1 or a2 or a3) > maxAceleration) or ((v1 or v2 or v3) > maxSpeed)){ //Si las aceleraciones o velocidades superasen el maximo
-    Serial.println("Debes darle más tiempo, no es tan rápido") 
+   if(((a1 or a2 or a3) > (float)maxAceleration) or ((v1 or v2 or v3) > (float)maxSpeed)){ //Si las aceleraciones o velocidades superasen el maximo
+    Serial.println("Debes darle más tiempo, no es tan rápido"); 
    }
    else{ //Si no pues seteamos la aceleracion y llamamos a move angles
     steppers[0].setAcceleration((int)a1);
