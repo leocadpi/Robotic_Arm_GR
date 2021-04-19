@@ -468,7 +468,10 @@ void setHome() {
 
 // Vuelta a la posición de home
 void goHome() {
-
+  float q1=0.0;
+  float q2=0.0;
+  float q3=0.0;
+  moveToAngles(q1,q2,q3);
 }
 
 //***************** Cinemática directa. Movimiento en q1, q2, q3 *****************//
