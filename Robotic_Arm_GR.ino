@@ -677,7 +677,34 @@ Vector3 inverseKinematics(float x, float y, float z) {
 // El movimiento de los ejes es síncrono, es decir, que todos los ejes lleguen a su destino
 // en el mismo tiempo
 void trajectory (float q1, float q2, float q3, float t) {
-  // moveToAngles(q1, q2, q3); ???
+  
+  float a1, a2, a3; //Esto es para las aceleraciones de cada motor
+  float d1,d2, d3        //Esto es para las distancias en pasos
+  float v1, v2, v3;
+  
+  //Calculamos distancia en pasos
+  d1= (q1*(GEAR_1*STEPS)/1.8) - (steppers[0].currenPosition()); //Los pasos que
+                                                                //damos desde donde estamos
+  d2= (q2*(GEAR_2*STEPS)/1.8) - (steppers[1].currenPosition());
+  d3= (q3*(GEAR_2*STEPS)/1.8) - (steppers[2].currenPosition());                                                              
+  //Calculamos las aceleraciones
+  a1 = (d1 - (float)currentSpeed *t))*(2/t^2);     //Formula a partir de la cinemática
+  a2 = (d2 - (float)currentSpeed *t))*(2/t^2);
+  a3 = (d3 - (float)currentSpeed *t))*(2/t^2);
+  //Calculamos las velocidades que se darian con esta aceleracion
+  v1= (float)currentSpeed + a1*t; // La sacamos de cinemática 
+  v2= (float)currentSpeed + a2*t;
+  v3= (float)currentSpeed + a3*t;
+  // Filtramos las aceleraciones                                                             
+   if(((a1 or a2 or a3) > maxAceleration) or ((v1 or v2 or v3) > maxSpeed)){ //Si las aceleraciones o velocidades superasen el maximo
+    Serial.println("Debes darle más tiempo, no es tan rápido") 
+   }
+   else{ //Si no pues seteamos la aceleracion y llamamos a move angles
+    steppers[0].setAcceleration((int)a1);
+    steppers[1].setAcceleration((int)a2);
+    steppers[2].setAcceleration((int)a3);
+    moveAngles(q1, q2, q3);
+   }
 }
 
 // Tarea p&p
