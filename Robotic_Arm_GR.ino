@@ -32,9 +32,6 @@ const double L3 = 200.0;
 const double Tz = -45.0;
 const double Tx = 65.0;
 
-float T_0_1[4][4];
-float T_1_2[4][4];
-float T_2_3[4][4];
 
 String buffer = "";
 bool endMoving = true;
@@ -49,6 +46,7 @@ int currentSpeed = 400;
 int maxSpeed = 500;
 int currentAcceleration = 1000;
 int pin1, pin2;
+
 
 void setup() {
   
@@ -441,7 +439,7 @@ void reset_stepper2() {
 void setHome() {
 
   String cadena_leida = "";
-
+/*
   // Leemos la cadena del monitor
   if (Serial.available() > 0) {                                     // Comprobamos si en el buffer hay datos
     do {
@@ -450,7 +448,7 @@ void setHome() {
       delay(5);
     } while (Serial.available() > 0);
   }
-  
+  */
   // Sacamos los valores de ángulos
   float angulos[3] = {0.0, 0.0, 0.0};                               // Array para guardar los valores de los ángulos
   char separador = ' ';                                                  // Espacio como separador
@@ -480,8 +478,9 @@ bool dentroLimites1(float q1) {
 
   // Variable de la posición actual
   float posActual = steppers[0].currentPosition() * 1.8/ (GEAR_1 * STEPS);
+  
   // Si al sumarle la posición seguimos dentro de los límites devolverá true
-  return q1 + posActual < qlimit_0[0] && q1 + posActual > qlimit_0[1];
+  return (q1 + posActual < qlimit_0[0]) && (q1 + posActual > qlimit_0[1]);
 
 }
 
@@ -607,10 +606,13 @@ float denavit(float q, float d, float a, float alfa) {
 
 }
 
-
+*/
 // Función que utiliza la función denavit para calcular 0T3 (de la base al extremo 3)
 Vector3 forwardKinematics (float q1, float q2, float q3) {
 
+  float T_0_1[4][4];
+  float T_1_2[4][4];
+  float T_2_3[4][4];
   Vector3 elpepe;
   float q[3] = {q1, q2-90, q2-q3};                                            // Vector donde estan las variables q denavit
   float d[3] = {L1, 0, 0};                                                    // Vector de variables d
@@ -635,7 +637,7 @@ Vector3 forwardKinematics (float q1, float q2, float q3) {
 
 }
 
-*/
+
 //***************** Cinemática inversa. Movimiento en x, y, z *****************//
 
 // Lleva el extremo a una posición cartesiana x, y, z determinada
@@ -688,23 +690,23 @@ void trajectory (float q1, float q2, float q3, float t) {
   d2= (q2*(GEAR_2*STEPS)/1.8) - (steppers[1].currentPosition());
   d3= (q3*(GEAR_2*STEPS)/1.8) - (steppers[2].currentPosition());                                                              
   //Calculamos las aceleraciones
-  a1 = (d1 - (float)currentSpeed *t)*(2/t^2);     //Formula a partir de la cinemática
-  a2 = (d2 - (float)currentSpeed *t)*(2/t^2);
-  a3 = (d3 - (float)currentSpeed *t)*(2/t^2);
+  a1 = (d1 - (float)currentSpeed *t)*(2/(t*t));     //Formula a partir de la cinemática
+  a2 = (d2 - (float)currentSpeed *t)*(2/(t*t));     //t^2 no funciona tiramos con t*t
+  a3 = (d3 - (float)currentSpeed *t)*(2/(t*t));
   
   //Calculamos las velocidades que se darian con esta aceleracion
   v1= (float)currentSpeed + a1*t; // La sacamos de cinemática 
   v2= (float)currentSpeed + a2*t;
   v3= (float)currentSpeed + a3*t;
   // Filtramos las aceleraciones                                                             
-   if(((a1 or a2 or a3) > (float)maxAceleration) or ((v1 or v2 or v3) > (float)maxSpeed)){ //Si las aceleraciones o velocidades superasen el maximo(maxAceleration no existe)
+   if(((v1 or v2 or v3) > (float)maxSpeed)){ //Si las aceleraciones o velocidades superasen el maximo(maxAceleration no existe)
     Serial.println("Debes darle más tiempo, no es tan rápido"); 
    }
    else{ //Si no pues seteamos la aceleracion y llamamos a move angles
     steppers[0].setAcceleration((int)a1);
     steppers[1].setAcceleration((int)a2);
     steppers[2].setAcceleration((int)a3);
-    moveAngles(q1, q2, q3);
+    moveToAngles(q1, q2, q3);
    }
 }
 
