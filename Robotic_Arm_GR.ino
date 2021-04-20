@@ -88,13 +88,13 @@ void loop() {
       }
   }
 
-  /*
+  
   // Visualización finales de carrera
   sensor1 = digitalRead(pin1);
   Serial.println(sensor1);
   sensor2 = digitalRead(pin2);
   Serial.println(sensor2);
-  */
+  
   
   // Permito corriente a los motores en un movimiento
   long isMoving = 0;
@@ -311,7 +311,7 @@ void reset_stepper0() {
   
   // La misma condición de antes pero ahora con -90 grados
   while (final_2) {
-    if (cuenta_pasos2_grad < 90.0 * GEAR_1 * STEPS) {
+    if (cuenta_pasos2_grad < 180.0 * GEAR_1 * STEPS) {
       steppers[0].step();
       delay(10);
       cuenta_pasos2++;
@@ -393,7 +393,8 @@ void reset_stepper1() {
   delay(1000);
 
   // Nos movemos a la posicion inicial 0.0
-  move_q2(0.0);
+  // Nos movemos a la posicion inicial 0.0
+  steppers[1].moveTo(-qlimit_1[1]);
   delay(1000);
 }
 
@@ -440,27 +441,30 @@ void reset_stepper2() {
   steppers[2].setCurrentPosition(-(count_steps2 - count_steps1));
   delay(1000);
 
-  move_q3(0.0);
+   // Nos movemos a la posicion inicial 0.0
+  steppers[2].moveTo(-qlimit_2[1]);
   delay(1000);
 }
 
 // Punto inicial
 void setHome() {    // Un segundo intento con el set home primero llamams a los tres steppers para poder encontrar
                     // el punto que 0.0 de los tres para poder determinar el home
+
+   for (int i = 0; i < 3; i++) {
+    steppers[i].setCurrentPosition(lastPositions[0]);
+  }
+  
   reset_stepper0();
-  delay(3000);
+  delay(2000);
   reset_stepper1();
-  delay(3000);
+  delay(2000);
   reset_stepper2();
                     
   // Ahora es el momento en el que tenemos una posicion fija que puede 
   // determinarse como el origen de todos nuestros movimientos por eso
   // creo que es el lugar mas indicado para llamarlo home
   
-  for (int i = 0; i < 3; i++) {
-    steppers[i].setCurrentPosition(lastPositions[0]);
-  }
-  
+ 
   //Aqui uso esta otra funcion porque establece la posición actual del motor
   //y además actualiza el currentPosition poniendolo en 0.0 siendo el origen.
 }
