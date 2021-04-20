@@ -19,7 +19,7 @@ struct Vector3 {
   double z;
 };
 
-float lastPositions[3] = {0,0,0};
+float lastPositions[3] = {0, 0, 0};
 const double RADS = PI / 180.0;
 const double DEGS = 180.0 / PI;
 const int STEPS = 2; // Micropasos/paso ???
@@ -88,13 +88,14 @@ void loop() {
       }
   }
 
-/*
+  /*
   // Visualización finales de carrera
   sensor1 = digitalRead(pin1);
   Serial.println(sensor1);
   sensor2 = digitalRead(pin2);
   Serial.println(sensor2);
-*/
+  */
+  
   // Permito corriente a los motores en un movimiento
   long isMoving = 0;
 
@@ -143,25 +144,29 @@ void parseBuffer() {
   bool move1enable = false;
   bool move2enable = false;
   bool move3enable = false;
+  
+  bool sHome = false;
+  bool gHome = false;
 
   // Filtrado del mensaje por el puerto serie
   while (true) {
     startIndex = buffer.indexOf(" ", endIndex);
     endIndex = buffer.indexOf(" ", startIndex + 1);
     tmp = buffer.substring(startIndex + 1, endIndex);
-   
+    
+    /*
     if (tmp.indexOf("q1", 0) > -1) {
       values[0] = tmp.substring(2, tmp.length());
       Serial.println(values[0]);
       move_q1(stringToFloat(values[0]));
     }
-    else if (tmp.indexOf("open", 0) > -1) {
+    */
+    if (tmp.indexOf("open", 0) > -1) {
       openEnable = true;
     }
     else if (tmp.indexOf("close", 0) > -1) {
       closeEnable = true;
     }
-    /////////////////////////////////////////////
     else if(tmp.indexOf("m1", 0) > -1){    // ??? 
       move1enable = true;
     }
@@ -171,7 +176,6 @@ void parseBuffer() {
     else if(tmp.indexOf("m3", 0) > -1){    // ??? 
       move3enable = true;
     }
-    /////////////////////////////////////////////
     else if(tmp.indexOf("r1", 0) > -1) {
       reset1 = true;
     }
@@ -181,7 +185,12 @@ void parseBuffer() {
     else if(tmp.indexOf("r3", 0) > -1) {
       reset3 = true;
     }
-    /////////////////////////////////////////////
+    else if (tmp.indexOf("sh", 0) > -1) {
+      sHome = true;
+    }
+    else if (tmp.indexOf("gh", 0) > -1){
+      gHome = true;
+    }
     
     count++;
     
@@ -196,29 +205,29 @@ void parseBuffer() {
   else if (openEnable) {
     open_grip();
   }
-
-  else if(move1enable){
+  else if (move1enable) {
     move_q1(30);
   }
-  
-  else if(move2enable){
+  else if (move2enable) {
     move_q2(30);
   }
-
-  else if(move3enable){
+  else if (move3enable) {
     move_q3(30);
   }
-
-  else if(reset1){
+  else if (reset1) {
     reset_stepper0();
   }
-
-  else if(reset2){
+  else if (reset2) {
     reset_stepper1();
   }
-  
-  else if(reset3){
+  else if (reset3) {
     reset_stepper2();
+  }
+  else if (sHome) {
+    setHome();
+  }
+  else if (gHome) {
+    goHome();
   }
 
   Serial.println("OK"); // Está filtrado
@@ -227,7 +236,7 @@ void parseBuffer() {
 
 // Establecer velocidad de los motores
 void setSpeedConfiguration(float c_speed, float max_speed, float accel) {
-    for (int i=0;i<3;i++) {
+    for (int i = 0; i < 3; i++) {
       steppers[i].setSpeed(c_speed);
       steppers[i].setMaxSpeed(max_speed);
       steppers[i].setAcceleration(accel);
@@ -436,10 +445,31 @@ void reset_stepper2() {
 }
 
 // Punto inicial
-void setHome() {
+void setHome() {    // Un segundo intento con el set home primero llamams a los tres steppers para poder encontrar
+                    // el punto que 0.0 de los tres para poder determinar el home
+  reset_stepper0();
+  delay(3000);
+  reset_stepper1();
+  delay(3000);
+  reset_stepper2();
+                    
+  // Ahora es el momento en el que tenemos una posicion fija que puede 
+  // determinarse como el origen de todos nuestros movimientos por eso
+  // creo que es el lugar mas indicado para llamarlo home
+  
+  for (int i = 0; i < 3; i++) {
+    steppers[i].setCurrentPosition(lastPositions[0]);
+  }
+  
+  //Aqui uso esta otra funcion porque establece la posición actual del motor
+  //y además actualiza el currentPosition poniendolo en 0.0 siendo el origen.
+}
 
-  String cadena_leida = "";
 /*
+void setHome() {
+ 
+  String cadena_leida = "";
+  
   // Leemos la cadena del monitor
   if (Serial.available() > 0) {                                     // Comprobamos si en el buffer hay datos
     do {
@@ -448,7 +478,7 @@ void setHome() {
       delay(5);
     } while (Serial.available() > 0);
   }
-  */
+  
   // Sacamos los valores de ángulos
   float angulos[3] = {0.0, 0.0, 0.0};                               // Array para guardar los valores de los ángulos
   char separador = ' ';                                                  // Espacio como separador
@@ -465,13 +495,14 @@ void setHome() {
   }
 
 }
+*/
 
 // Vuelta a la posición de home
 void goHome() {
-  float q1=0.0;
-  float q2=0.0;
-  float q3=0.0;
-  moveToAngles(q1,q2,q3);
+  float q1 = 0.0;
+  float q2 = 0.0;
+  float q3 = 0.0;
+  moveToAngles(q1, q2, q3);
 }
 /*
 void setHome() {//un segundo intento con el set home
@@ -492,6 +523,8 @@ void setHome() {//un segundo intento con el set home
                     //y además actualiza el currentPosition poniendolo en 0.0 siendo el origen.
 }
 */
+
+
 //***************** Cinemática directa. Movimiento en q1, q2, q3 *****************//
 
 // Funciones que comprueban si estamos dentro de los límites
@@ -634,7 +667,9 @@ Vector3 forwardKinematics (float q1, float q2, float q3) {
   float T_0_1[4][4];
   float T_1_2[4][4];
   float T_2_3[4][4];
+  
   Vector3 elpepe;
+  
   float q[3] = {q1, q2-90, q2-q3};                                            // Vector donde estan las variables q denavit
   float d[3] = {L1, 0, 0};                                                    // Vector de variables d
   float a[3] = {0, L2, L3};                                                   // Vector de variables a
@@ -644,6 +679,7 @@ Vector3 forwardKinematics (float q1, float q2, float q3) {
   denavit(q[0], d[0], a[0], alf[0], T_0_1);
   denavit(q[1], d[1], a[1], alf[1], T_1_2);
   denavit(q[2], d[2], a[2], alf[2], T_2_3);
+  
   float T_0_3[4][4];                                                          // Esta es la matriz que queremos
   float T_0_2[4][4];                                                          // Esta es para el resultado de la multiplicacion intermedia
   
@@ -697,33 +733,33 @@ Vector3 inverseKinematics(float x, float y, float z) {
 
 // Trayectoria
 // Mueve el robot a una posición articular (q1, q2, q3)
-// El movimiento de los ejes es síncrono, es decir, que todos los ejes lleguen a su destino
-// en el mismo tiempo
+// El movimiento de los ejes es síncrono, es decir, que todos los ejes lleguen a su destino en el mismo tiempo
 void trajectory (float q1, float q2, float q3, float t) {
   
-  float a1, a2, a3; //Esto es para las aceleraciones de cada motor
-  float d1,d2, d3;        //Esto es para las distancias en pasos
+  float a1, a2, a3;   // Esto es para las aceleraciones de cada motor
+  float d1, d2, d3;   // Esto es para las distancias en pasos
   float v1, v2, v3;
   
-  //Calculamos distancia en pasos
-  d1= (q1*(GEAR_1*STEPS)/1.8) - (steppers[0].currentPosition()); //Los pasos que
-                                                                //damos desde donde estamos
-  d2= (q2*(GEAR_2*STEPS)/1.8) - (steppers[1].currentPosition());
-  d3= (q3*(GEAR_2*STEPS)/1.8) - (steppers[2].currentPosition());                                                              
-  //Calculamos las aceleraciones
-  a1 = (d1 - (float)currentSpeed *t)*(2/(t*t));     //Formula a partir de la cinemática
-  a2 = (d2 - (float)currentSpeed *t)*(2/(t*t));     //t^2 no funciona tiramos con t*t
-  a3 = (d3 - (float)currentSpeed *t)*(2/(t*t));
+  // Calculamos distancia en pasos
+  d1 = (q1 * (GEAR_1 * STEPS) / 1.8) - (steppers[0].currentPosition());   // Los pasos que damos desde donde estamos
+  d2 = (q2 * (GEAR_2 * STEPS) / 1.8) - (steppers[1].currentPosition());
+  d3 = (q3 * (GEAR_2 * STEPS) / 1.8) - (steppers[2].currentPosition());
   
-  //Calculamos las velocidades que se darian con esta aceleracion
-  v1= (float)currentSpeed + a1*t; // La sacamos de cinemática 
-  v2= (float)currentSpeed + a2*t;
-  v3= (float)currentSpeed + a3*t;
+  // Calculamos las aceleraciones
+  a1 = (d1 - (float)currentSpeed * t) * (2 / (t * t));                    // Formula a partir de la cinemática
+  a2 = (d2 - (float)currentSpeed * t) * (2 / (t * t));                    // t^2 no funciona tiramos con t*t
+  a3 = (d3 - (float)currentSpeed * t) * (2 / (t * t));
+  
+  // Calculamos las velocidades que se darian con esta aceleracion
+  v1 = (float)currentSpeed + a1 * t;                                      // La sacamos de cinemática 
+  v2 = (float)currentSpeed + a2 * t;
+  v3 = (float)currentSpeed + a3 * t;
+  
   // Filtramos las aceleraciones                                                             
-   if(((v1 or v2 or v3) > (float)maxSpeed)){ //Si las aceleraciones o velocidades superasen el maximo(maxAceleration no existe)
+   if (((v1 or v2 or v3) > (float)maxSpeed)) {                            // Si las aceleraciones o velocidades superasen el maximo(maxAceleration no existe)
     Serial.println("Debes darle más tiempo, no es tan rápido"); 
    }
-   else{ //Si no pues seteamos la aceleracion y llamamos a move angles
+   else { //Si no pues seteamos la aceleracion y llamamos a move angles
     steppers[0].setAcceleration((int)a1);
     steppers[1].setAcceleration((int)a2);
     steppers[2].setAcceleration((int)a3);
