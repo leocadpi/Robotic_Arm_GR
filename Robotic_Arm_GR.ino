@@ -473,7 +473,25 @@ void goHome() {
   float q3=0.0;
   moveToAngles(q1,q2,q3);
 }
-
+/*
+void setHome() {//un segundo intento con el set home
+                    //primero llamams a los tres steppers para poder encontrar
+                    //el punto que 0.0 de los tres para poder determinar el home
+  reset_stepper0();
+    delay(3000);
+  reset_stepper1();
+    delay(3000);
+  reset_stepper2();
+                    //Ahora es el momento en el que tenemos una posicion fija que puede 
+                    //determinarse como el origen de todos nuestros movimientos por eso
+                    //creo que es el lugar mas indicado para llamarlo home
+  for (int i = 0; i < 3; i++) {
+    steppers[i].setCurrentPosition( lastPositions[0]);
+  }     
+                    //Aqui uso esta otra funcion porque establece la posición actual del motor
+                    //y además actualiza el currentPosition poniendolo en 0.0 siendo el origen.
+}
+*/
 //***************** Cinemática directa. Movimiento en q1, q2, q3 *****************//
 
 // Funciones que comprueban si estamos dentro de los límites
