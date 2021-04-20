@@ -148,6 +148,8 @@ void parseBuffer() {
   bool sHome = false;
   bool gHome = false;
 
+  bool mAngles = false;
+
   // Filtrado del mensaje por el puerto serie
   while (true) {
     startIndex = buffer.indexOf(" ", endIndex);
@@ -190,6 +192,8 @@ void parseBuffer() {
     }
     else if (tmp.indexOf("gh", 0) > -1){
       gHome = true;
+    }else if (tmp.indexOf("ma", 0) > -1){
+      mAngles = true;
     }
     
     count++;
@@ -228,6 +232,8 @@ void parseBuffer() {
   }
   else if (gHome) {
     goHome();
+  }else if (mAngles) {
+    moveToAngles(30,20,20);
   }
 
   Serial.println("OK"); // Está filtrado
@@ -394,7 +400,7 @@ void reset_stepper1() {
 
   // Nos movemos a la posicion inicial 0.0
   // Nos movemos a la posicion inicial 0.0
-  steppers[1].moveTo(-qlimit_1[1]);
+  move_q2(0.0);
   delay(1000);
 }
 
@@ -442,7 +448,7 @@ void reset_stepper2() {
   delay(1000);
 
    // Nos movemos a la posicion inicial 0.0
-  steppers[2].moveTo(-qlimit_2[1]);
+  move_q3(0.0);
   delay(1000);
 }
 
@@ -535,28 +541,28 @@ void setHome() {//un segundo intento con el set home
 bool dentroLimites1(float q1) {
 
   // Variable de la posición actual
-  float posActual = steppers[0].currentPosition() * 1.8/ (GEAR_1 * STEPS);
+  //float posActual = steppers[0].currentPosition() * 1.8/ (GEAR_1 * STEPS);
   
   // Si al sumarle la posición seguimos dentro de los límites devolverá true
-  return (q1 + posActual < qlimit_0[0]) && (q1 + posActual > qlimit_0[1]);
+  return (q1 < qlimit_0[0]) && (q1 > qlimit_0[1]);
 
 }
 
 bool dentroLimites2(float q2) {
 
   // Variable de la posición actual
-  float posActual = steppers[1].currentPosition() * 1.8/ (GEAR_2 * STEPS);
+  //float posActual = steppers[1].currentPosition() * 1.8/ (GEAR_2 * STEPS);
   // Si al sumarle la posición seguimos dentro de los límites devolverá true
-  return q2 + posActual < qlimit_1[0] && q2 + posActual > qlimit_1[1];
+  return (q2 < qlimit_1[0]) && (q2 > qlimit_1[1]);
 
 }
 
 bool dentroLimites3(float q3) {
 
   // Variable de la posición actual
-  float posActual = steppers[2].currentPosition() * 1.8/ (GEAR_2 * STEPS);
+  //float posActual = steppers[2].currentPosition() * 1.8/ (GEAR_2 * STEPS);
   // Si al sumarle la posición seguimos dentro de los límites devolverá true
-  return q3 + posActual < qlimit_2[0] && q3 + posActual > qlimit_2[1];
+  return (q3 < qlimit_2[0]) && (q3 > qlimit_2[1]);
 
 }
 
@@ -571,13 +577,13 @@ void move_q1(float q1) {
 
   // Si está dentro
   if (in == true) {
-    steppers[0].setSpeed(currentSpeed);                 // Establecemos la velocidad
+    //steppers[0].setSpeed(currentSpeed);                 // Establecemos la velocidad
     //steppers[0].setMaxSpeed(maxSpeed);                  // ???
     //steppers[0].setAcceleration(currentAcceleration);   // ???
     q_pasos = q1 * (GEAR_1 * STEPS)/ 1.8;                                 // Paso de grados q1 a pasos
     steppers[0].moveTo(q_pasos);                        // Movemos el eje
-    lastPositions[0] += q_pasos;                        // Actualizamos el vector lastPosition con los pasos calculados
-    steppers[0].setCurrentPosition(lastPositions[0]);   // Establecemos la posición actual del motor
+    lastPositions[0] = q_pasos;                        // Actualizamos el vector lastPosition con los pasos calculados
+       
   }
   // Si está fuera
   else {
@@ -595,13 +601,13 @@ void move_q2(float q2) {
 
   // Si está dentro
   if (in == true) {
-    steppers[1].setSpeed(currentSpeed);                 // Establecemos la velocidad
+    //steppers[1].setSpeed(currentSpeed);                 // Establecemos la velocidad
     //steppers[1].setMaxSpeed(maxSpeed);                  // ???
     //steppers[1].setAcceleration(currentAcceleration);   // ???
     q_pasos = q2 * (GEAR_2 * STEPS)/ 1.8;                                 // Paso de grados q1 a pasos
     steppers[1].moveTo(q_pasos);                        // Movemos el eje
-    lastPositions[1] += q_pasos;                        // Actualizamos el vector lastPosition con los pasos calculados
-    steppers[1].setCurrentPosition(lastPositions[1]);   // Establecemos la posición actual del motor
+    lastPositions[1] = q_pasos;                        // Actualizamos el vector lastPosition con los pasos calculados
+      // Establecemos la posición actual del motor
   }
   // Si está fuera
   else {
@@ -619,13 +625,13 @@ void move_q3(float q3) {
 
   // Si está dentro
   if (in == true) {
-    steppers[2].setSpeed(currentSpeed);               // Establecemos la velocidad
+    //steppers[2].setSpeed(currentSpeed);               // Establecemos la velocidad
     //steppers[2].setMaxSpeed(maxSpeed);                  // ???
     //steppers[2].setAcceleration(currentAcceleration);   // ???
     q_pasos = q3 * (GEAR_2 * STEPS)/ 1.8;                               // Paso de grados q1 a pasos
     steppers[2].moveTo(q_pasos);                      // Movemos el eje
-    lastPositions[2] += q_pasos;                      // Actualizamos el vector lastPosition con los pasos calculados
-    steppers[2].setCurrentPosition(lastPositions[2]); // Establecemos la posición actual del motor
+    lastPositions[2] = q_pasos;                      // Actualizamos el vector lastPosition con los pasos calculados
+    
   }
   // Si está fuera
   else {
