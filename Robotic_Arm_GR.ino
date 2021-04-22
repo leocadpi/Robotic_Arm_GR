@@ -736,6 +736,26 @@ Vector3 inverseKinematics(float x, float y, float z) {
   // beta = arctg(z / R)
   // alfa = arctg(L3 * sin(q3) / (L2 + L3 * cos(q3)))
   ////////////////////////////////////////////////////
+  /*
+    q1 = arctg(y/x);
+    q2 = q2 = beta - alfa
+    q3 = (y^2 + (z - L1)^2 - L2^2 - L3^2)/(2*L2*L3)  
+  
+    beta = arctg(y / z - L1)
+    alfa = arctg(L3 * sin(q3) / (L2 + L3 * cos(q3)))
+  
+    Estas formulas salen de un ejercicio de los pdf de teoría, lo único que varía 
+    Es que q1 en este caso también es rotacional
+  
+  */
+  /////////////////////////////////////////////////////
+  //La diferencia entre la forma de arriba y la de abajo creo que se cual es, ya la discutiremos
+  //Mucho texto para explicar por aquí
+  
+  //resultado.x = q1;
+  //resultado.y = q2;
+  //resultado.z = q3;
+  
 
   return resultado;
 
