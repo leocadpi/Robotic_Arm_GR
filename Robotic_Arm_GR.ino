@@ -198,13 +198,16 @@ void parseBuffer() {
     }
     else if (tmp.indexOf("gh", 0) > -1){
       gHome = true;
-    }else if (tmp.indexOf("ma", 0) > -1){
+    }
+    else if (tmp.indexOf("ma", 0) > -1){
       mAngles = true;
     }
-    }else if (tmp.indexOf("trayec", 0) > -1){
+    
+    else if (tmp.indexOf("trayec", 0) > -1){
       trayectoria = true;
     }
-    }else if (tmp.indexOf("fkin", 0) > -1){
+    
+    else if (tmp.indexOf("fkin", 0) > -1){
       fkinematics = true;
     }
     
@@ -244,24 +247,25 @@ void parseBuffer() {
   }
   else if (gHome) {
     goHome();
-  }else if (mAngles) {
+  }
+  else if (mAngles) {
     if (Serial.available() > 0)
    {
       Serial.println("Introduce los angulos");
       Serial.println("q1");
-      String str = Serial.readStringUntil('\n');
-      ku1 = str.toFloat();
-      DEBUG(ku1);
+      String str1 = Serial.readStringUntil('\n');
+      ku1 = str1.toFloat();
+//      DEBUG(ku1);
       
       Serial.println("q2");
-      String str = Serial.readStringUntil('\n');
-       ku2 = str.toFloat();
-      DEBUG(ku2);
+      String str2 = Serial.readStringUntil('\n');
+       ku2 = str2.toFloat();
+  //    DEBUG(ku2);
       
       Serial.println("q3");
-      String str = Serial.readStringUntil('\n');
-      ku3 = str.toFloat();
-      DEBUG(ku3);
+      String str3 = Serial.readStringUntil('\n');
+      ku3 = str3.toFloat();
+    //  DEBUG(ku3);
       
    }
     moveToAngles(ku1, ku2, ku3);
@@ -271,22 +275,22 @@ void parseBuffer() {
      {
       Serial.println("Introduce los angulos");
       Serial.println("q1");
-      String str = Serial.readStringUntil('\n');
-      ku1 = str.toFloat();
-      DEBUG(ku1);
+      String str1 = Serial.readStringUntil('\n');
+      ku1 = str1.toFloat();
+      //DEBUG(ku1);
       
       Serial.println("q2");
-      String str = Serial.readStringUntil('\n');
-       ku2 = str.toFloat();
-      DEBUG(ku2);
+      String str2 = Serial.readStringUntil('\n');
+       ku2 = str2.toFloat();
+      //DEBUG(ku2);
       
       Serial.println("q3");
-      String str = Serial.readStringUntil('\n');
-      ku3 = str.toFloat();
-      DEBUG(ku3);
+      String str3 = Serial.readStringUntil('\n');
+      ku3 = str3.toFloat();
+      //DEBUG(ku3);
       
    }
-      pepe = fordwarKinematics(ku1, ku2, ku3);
+      pepe = forwardKinematics(ku1, ku2, ku3);
       Serial.print("X: "); Serial.print(pepe.x); 
       Serial.print("   Y: "); Serial.print(pepe.y);
       Serial.print("   Z: "); Serial.println(pepe.z);
@@ -296,24 +300,24 @@ void parseBuffer() {
      {
       Serial.println("Introduce los angulos");
       Serial.println("q1");
-      String str = Serial.readStringUntil('\n');
-      ku1 = str.toFloat();
-      DEBUG(ku1);
+      String str1 = Serial.readStringUntil('\n');
+      ku1 = str1.toFloat();
+      //DEBUG(ku1);
       
       Serial.println("q2");
-      String str = Serial.readStringUntil('\n');
-       ku2 = str.toFloat();
-      DEBUG(ku2);
+      String str2 = Serial.readStringUntil('\n');
+       ku2 = str2.toFloat();
+      //DEBUG(ku2);
       
       Serial.println("q3");
-      String str = Serial.readStringUntil('\n');
-      ku3 = str.toFloat();
-      DEBUG(ku3);
+      String str3 = Serial.readStringUntil('\n');
+      ku3 = str3.toFloat();
+      //DEBUG(ku3);
        
       Serial.println("Tiempo");
-      String str = Serial.readStringUntil('\n');
-      tiempo = str.toFloat();
-      DEBUG(tiempo); 
+      String str4 = Serial.readStringUntil('\n');
+      tiempo = str4.toFloat();
+      //DEBUG(tiempo); 
       
    }
    trajectory(ku1, ku2, ku3, tiempo); 
@@ -576,17 +580,14 @@ void setHome() {
   float angulos[3] = {0.0, 0.0, 0.0};                               // Array para guardar los valores de los ángulos
   char separador = ' ';                                                  // Espacio como separador
   int index;                                                        // Para la posición de los espacios en el String
-
   for (int i = 0; i < cadena_leida.length(); i++) {
     index = cadena_leida.indexOf(separador);                        // Localizamos espacios dentro de la cadena (desde el pricipio)
     angulos[i] = stringToFloat(cadena_leida.substring(0, index));   // Sacamos parte de la cadena desde 0 hasta el espacio encontrado NO INCLUIDO
     cadena_leida = cadena_leida.substring(index + 1);               // Quitamos el espacio junto con la parte antes del mismo
   }
-
   for (int i = 0; i < 3; i++) {
     steppers[i].setCurrentPosition(angulos[i] / 1.8);
   }
-
 }
 */
 
@@ -743,16 +744,12 @@ void denavit(float q, float d, float a, float alfa, float t[][4]) {
 // T1, 2, o 3 junto con los parametros que se calcularon de la tabla denavit
 /*
 float denavit(float q, float d, float a, float alfa) {
-
   float T[][4] = { {cos(q), -cos(alfa)*sin(q) ,sin(alfa)*sin(q), a*cos(q)},
                    {sin(q), cos(alfa)*cos(q), -sin(alfa)*cos(q), a*sin(q)},
                    {0.0, sin(alfa), cos(alfa), d},
                    {0.0, 0.0, 0.0, 1.0} };
-
   return T;
-
 }
-
 */
 // Función que utiliza la función denavit para calcular 0T3 (de la base al extremo 3)
 Vector3 forwardKinematics (float q1, float q2, float q3) {
@@ -776,8 +773,8 @@ Vector3 forwardKinematics (float q1, float q2, float q3) {
   float T_0_3[4][4];                                                          // Esta es la matriz que queremos
   float T_0_2[4][4];                                                          // Esta es para el resultado de la multiplicacion intermedia
   
-  Matrix.Multiply((double*)T_0_1, (double*)T_1_2, 4, 4, 4, (double*)T_0_2);   // Primera pultiplicacion de t1 y t2
-  Matrix.Multiply((double*)T_0_2, (double*)T_2_3, 4, 4, 4, (double*)T_0_3);   // Segundo multiplicacion del resultado anterior por t3
+  Matrix.Multiply((float*)T_0_1, (float*)T_1_2, 4, 4, 4, (float*)T_0_2);   // Primera pultiplicacion de t1 y t2
+  Matrix.Multiply((float*)T_0_2, (float*)T_2_3, 4, 4, 4, (float*)T_0_3);   // Segundo multiplicacion del resultado anterior por t3
   
   elpepe.x = T_0_3[0][3];                                                     // Igualamos las tres variables internas 
   elpepe.y = T_0_3[1][3];                                                     // del struct al resultado del vector de traslación de nuestra matriz 0T3
