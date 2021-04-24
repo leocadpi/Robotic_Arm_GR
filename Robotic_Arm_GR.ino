@@ -147,9 +147,15 @@ void parseBuffer() {
   
   bool sHome = false;
   bool gHome = false;
-
+  bool fkinematics = false;
+  bool trayectoria = false;
   bool mAngles = false;
-
+  
+  Vector3 pepe;
+  float ku1;
+  float ku2;
+  float ku3;
+  float tiempo;
   // Filtrado del mensaje por el puerto serie
   while (true) {
     startIndex = buffer.indexOf(" ", endIndex);
@@ -195,6 +201,12 @@ void parseBuffer() {
     }else if (tmp.indexOf("ma", 0) > -1){
       mAngles = true;
     }
+    }else if (tmp.indexOf("trayec", 0) > -1){
+      trayectoria = true;
+    }
+    }else if (tmp.indexOf("fkin", 0) > -1){
+      fkinematics = true;
+    }
     
     count++;
     
@@ -233,9 +245,80 @@ void parseBuffer() {
   else if (gHome) {
     goHome();
   }else if (mAngles) {
-    moveToAngles(30,20,20);
+    if (Serial.available() > 0)
+   {
+      Serial.println("Introduce los angulos");
+      Serial.println("q1");
+      String str = Serial.readStringUntil('\n');
+      ku1 = str.toFloat();
+      DEBUG(ku1);
+      
+      Serial.println("q2");
+      String str = Serial.readStringUntil('\n');
+       ku2 = str.toFloat();
+      DEBUG(ku2);
+      
+      Serial.println("q3");
+      String str = Serial.readStringUntil('\n');
+      ku3 = str.toFloat();
+      DEBUG(ku3);
+      
+   }
+    moveToAngles(ku1, ku2, ku3);
   }
-
+  else if(fkinematics){
+       if (Serial.available() > 0)
+     {
+      Serial.println("Introduce los angulos");
+      Serial.println("q1");
+      String str = Serial.readStringUntil('\n');
+      ku1 = str.toFloat();
+      DEBUG(ku1);
+      
+      Serial.println("q2");
+      String str = Serial.readStringUntil('\n');
+       ku2 = str.toFloat();
+      DEBUG(ku2);
+      
+      Serial.println("q3");
+      String str = Serial.readStringUntil('\n');
+      ku3 = str.toFloat();
+      DEBUG(ku3);
+      
+   }
+      pepe = fordwarKinematics(ku1, ku2, ku3);
+      Serial.print("X: "); Serial.print(pepe.x); 
+      Serial.print("   Y: "); Serial.print(pepe.y);
+      Serial.print("   Z: "); Serial.println(pepe.z);
+  }
+  else if(trayectoria){
+     if (Serial.available() > 0)
+     {
+      Serial.println("Introduce los angulos");
+      Serial.println("q1");
+      String str = Serial.readStringUntil('\n');
+      ku1 = str.toFloat();
+      DEBUG(ku1);
+      
+      Serial.println("q2");
+      String str = Serial.readStringUntil('\n');
+       ku2 = str.toFloat();
+      DEBUG(ku2);
+      
+      Serial.println("q3");
+      String str = Serial.readStringUntil('\n');
+      ku3 = str.toFloat();
+      DEBUG(ku3);
+       
+      Serial.println("Tiempo");
+      String str = Serial.readStringUntil('\n');
+      tiempo = str.toFloat();
+      DEBUG(tiempo); 
+      
+   }
+   trajectory(ku1, ku2, ku3, tiempo); 
+    
+  }
   Serial.println("OK"); // Está filtrado
   buffer = "";
 }
