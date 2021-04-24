@@ -1,7 +1,11 @@
-// #include "MatrixMath.h"
+// Grupo 7
+// Leopoldo Cadavid
+// Viktoria Nikitina
+// Luís Pérez-Brotons Ballester
+// Luís Viejo López
 
 #include <Math.h>
-#include <MatrixMath.h>
+#include "MatrixMath.h"
 #include "MeMegaPi.h"
 #include <Servo.h>
 
