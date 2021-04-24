@@ -763,37 +763,50 @@ Vector3 inverseKinematics(float x, float y, float z) {
 
 // Trayectoria
 // Mueve el robot a una posición articular (q1, q2, q3)
-// El movimiento de los ejes es síncrono, es decir, que todos los ejes lleguen a su destino en el mismo tiempo
+// El movimiento de los ejes es síncrono, es decir, que todos los ejes lleguen a su destino
+// en el mismo tiempo
 void trajectory (float q1, float q2, float q3, float t) {
   
-  float a1, a2, a3;   // Esto es para las aceleraciones de cada motor
-  float d1, d2, d3;   // Esto es para las distancias en pasos
+  float a1, a2, a3; //Esto es para las aceleraciones de cada motor
+  float d1,d2, d3;        //Esto es para las distancias en pasos
   float v1, v2, v3;
   
-  // Calculamos distancia en pasos
-  d1 = (q1 * (GEAR_1 * STEPS) / 1.8) - (steppers[0].currentPosition());   // Los pasos que damos desde donde estamos
-  d2 = (q2 * (GEAR_2 * STEPS) / 1.8) - (steppers[1].currentPosition());
-  d3 = (q3 * (GEAR_2 * STEPS) / 1.8) - (steppers[2].currentPosition());
+  //Calculamos distancia en pasos
+  d1= (q1*(GEAR_1*STEPS)/1.8) - (steppers[0].currentPosition()); //Los pasos que
+                                                                //damos desde donde estamos
+  d2= (q2*(GEAR_2*STEPS)/1.8) - (steppers[1].currentPosition());
+  d3= (q3*(GEAR_2*STEPS)/1.8) - (steppers[2].currentPosition());                                                              
+  //Calculamos las aceleraciones
+  a1 = d1*(2/(t*t));     //Formula a partir de la cinemática
+  a2 = d2*(2/(t*t));
+  a3 = d3*(2/(t*t));
   
-  // Calculamos las aceleraciones
-  a1 = (d1 - (float)currentSpeed * t) * (2 / (t * t));                    // Formula a partir de la cinemática
-  a2 = (d2 - (float)currentSpeed * t) * (2 / (t * t));                    // t^2 no funciona tiramos con t*t
-  a3 = (d3 - (float)currentSpeed * t) * (2 / (t * t));
-  
-  // Calculamos las velocidades que se darian con esta aceleracion
-  v1 = (float)currentSpeed + a1 * t;                                      // La sacamos de cinemática 
-  v2 = (float)currentSpeed + a2 * t;
-  v3 = (float)currentSpeed + a3 * t;
-  
+  //Calculamos las velocidades que se darian con esta aceleracion
+  v1=  sqrt(2*a1*d1); // La sacamos de cinemática 
+  v2=  sqrt(2*a2*d2);
+  v3=  sqrt(2*a3*d3);
   // Filtramos las aceleraciones                                                             
-   if (((v1 or v2 or v3) > (float)maxSpeed)) {                            // Si las aceleraciones o velocidades superasen el maximo(maxAceleration no existe)
+   if((v1 or v2 or v3) > (float)maxSpeed){ //Si las aceleraciones o velocidades superasen el maximo(maxAceleration no existe)
     Serial.println("Debes darle más tiempo, no es tan rápido"); 
    }
-   else { //Si no pues seteamos la aceleracion y llamamos a move angles
+   else{ //Si no pues seteamos la aceleracion, velocidad y llamamos a move angles
     steppers[0].setAcceleration((int)a1);
     steppers[1].setAcceleration((int)a2);
     steppers[2].setAcceleration((int)a3);
+    
+    steppers[0].setSpeed((int)v1);
+    steppers[1].setSpeed((int)v2);
+    steppers[2].setSpeed((int)v3);
+    
     moveToAngles(q1, q2, q3);
+    delay(1000);
+    steppers[0].setAcceleration(currentAcceleration);
+    steppers[1].setAcceleration(currentAcceleration);
+    steppers[2].setAcceleration(currentAcceleration);
+    
+    steppers[0].setSpeed(currentSpeed);
+    steppers[1].setSpeed(currentSpeed);
+    steppers[2].setSpeed(currentSpeed);
    }
 }
 
