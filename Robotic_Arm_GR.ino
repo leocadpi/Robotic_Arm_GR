@@ -153,8 +153,8 @@ void parseBuffer() {
   
   Vector3 pepe;
   float ku[4];
-  char separador;
-  String aux, cadena_leida;
+  char separador = ' ';
+  String aux, cadena_leida = "";
   int index;
   
   
