@@ -54,7 +54,7 @@ void setup() {
   Serial.begin(115200);
 
   // Configuración motores paso a paso
-  setSpeedConfiguration(currentSpeed,maxSpeed,currentAcceleration);
+  setSpeedConfiguration(currentSpeed, maxSpeed, currentAcceleration);
   
   for (int i = 0; i < 3; i++) {
     steppers[i].setMicroStep(STEPS);
@@ -542,7 +542,9 @@ void setHome() {    // Un segundo intento con el set home primero llamams a los 
   reset_stepper1();
   delay(2000);
   reset_stepper2();
-                    
+  
+  setSpeedConfiguration(currentSpeed, maxSpeed, currentAcceleration);
+  
   // Ahora es el momento en el que tenemos una posicion fija que puede 
   // determinarse como el origen de todos nuestros movimientos por eso
   // creo que es el lugar mas indicado para llamarlo home
