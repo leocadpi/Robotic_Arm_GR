@@ -538,9 +538,9 @@ void setHome() {    // Un segundo intento con el set home primero llamams a los 
   }
   
   reset_stepper0();
-  delay(2000);
+  delay(100);
   reset_stepper1();
-  delay(2000);
+  delay(100);
   reset_stepper2();
   
   setSpeedConfiguration(currentSpeed, maxSpeed, currentAcceleration);
