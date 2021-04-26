@@ -722,27 +722,23 @@ void moveToAngles(float q1, float q2, float q3) {
 }
 
 // Función que devuelve la matriz de transformación T entre Si-1 y Si
-void denavit(float q, float d, float a, float alfa, float t[][4]) {
+void denavit(float q, float d, float a, float alfa, float t[4][4]) {
 
   float t1[4][4] = { {cos(q), -cos(alfa)*sin(q), sin(alfa)*sin(q), a*cos(q)},
                    {sin(q), cos(alfa)*cos(q), -sin(alfa)*cos(q), a*sin(q)},
                    {0.0, sin(alfa), cos(alfa), d},
                    {0.0, 0.0, 0.0, 1.0} };
-  t = t1;
-  
-}
 
-// No se si va, de momento la función lo que hace es recibir la matriz 4x4
-// T1, 2, o 3 junto con los parametros que se calcularon de la tabla denavit
-/*
-float denavit(float q, float d, float a, float alfa) {
-  float T[][4] = { {cos(q), -cos(alfa)*sin(q) ,sin(alfa)*sin(q), a*cos(q)},
-                   {sin(q), cos(alfa)*cos(q), -sin(alfa)*cos(q), a*sin(q)},
-                   {0.0, sin(alfa), cos(alfa), d},
-                   {0.0, 0.0, 0.0, 1.0} };
-  return T;
+  
+  //t = t1;
+   for(int i = 0; i<4 ; i++){
+    for(int j = 0; j<4 ; j++){
+      t[i][j] = t1[i][j] ;
+                      
+    }
+    
+  }
 }
-*/
 // Función que utiliza la función denavit para calcular 0T3 (de la base al extremo 3)
 Vector3 forwardKinematics (float q1, float q2, float q3) {
 
@@ -752,13 +748,20 @@ Vector3 forwardKinematics (float q1, float q2, float q3) {
   
   Vector3 elpepe;
   
-  float q[3] = {q1, q2-90, q2-q3};                                            // Vector donde estan las variables q denavit
+  float q[3] = {q1, q2-90, q3+90};                                            // Vector donde estan las variables q denavit
   float d[3] = {L1, 0, 0};                                                    // Vector de variables d
   float a[3] = {0, L2, L3};                                                   // Vector de variables a
   float alf[3] = {-90, 0, 0};                                                 // Vector de variables alfa
 
   // Llamamos a la funcion denavit pasandole cada matriz para que la modifique las matrices
   denavit(q[0], d[0], a[0], alf[0], T_0_1);
+  for(int i = 0; i<4 ; i++){
+    for(int j = 0; j<4 ; j++){
+      Serial.print (T_0_1[i][j]);
+      Serial.print("\t");                 
+    }
+    Serial.println("");
+  }
   denavit(q[1], d[1], a[1], alf[1], T_1_2);
   denavit(q[2], d[2], a[2], alf[2], T_2_3);
   
