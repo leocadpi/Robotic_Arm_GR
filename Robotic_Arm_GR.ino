@@ -747,7 +747,7 @@ Vector3 forwardKinematics (float q1, float q2, float q3) {
   float T_2_3[4][4];
   
   Vector3 elpepe;
-  
+  q3 = q2-q3;
   float q[3] = {q1, q2-90, q3+90};                                            // Vector donde estan las variables q denavit
   float d[3] = {L1, 0, 0};                                                    // Vector de variables d
   float a[3] = {0, L2, L3};                                                   // Vector de variables a
