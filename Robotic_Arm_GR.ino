@@ -153,6 +153,7 @@ void parseBuffer() {
   
   Vector3 pepe;
   float ku[4];
+  float qu[4];
   char separador = ' ';
   String aux, cadena_leida = "";
   int index;
@@ -226,14 +227,51 @@ void parseBuffer() {
   else if (openEnable) {
     open_grip();
   }
-  else if (move1enable) {
-    move_q1(30);
+ else if (move1enable) {
+    Serial.println("Introduce q1"); 
+    do{ }while(Serial.available()==0); 
+   if (Serial.available() > 0) {                                     // Comprobamos si en el buffer hay datos
+    
+    do {
+      cadena_leida = Serial.readStringUntil('\n');                   // Lee el string uno por uno y se almacena en una variable
+      delay(5);
+    } while (Serial.available() > 0);
+    
+      qu[0]= cadena_leida.toFloat();
+      move_q1(qu[0]);
+      
+  }
+   
   }
   else if (move2enable) {
-    move_q2(30);
+     Serial.println("Introduce q2"); 
+    do{ }while(Serial.available()==0); 
+    if (Serial.available() > 0) {                                     // Comprobamos si en el buffer hay datos
+    
+    do {
+      cadena_leida = Serial.readStringUntil('\n');                   // Lee el string uno por uno y se almacena en una variable
+      delay(5);
+    } while (Serial.available() > 0);
+    
+      qu[1]= cadena_leida.toFloat();
+      move_q2(qu[1]);
+      
+  }
   }
   else if (move3enable) {
-    move_q3(30);
+     Serial.println("Introduce q3"); 
+    do{ }while(Serial.available()==0); 
+    if (Serial.available() > 0) {                                     // Comprobamos si en el buffer hay datos
+    
+    do {
+      cadena_leida = Serial.readStringUntil('\n');                   // Lee el string uno por uno y se almacena en una variable
+      delay(5);
+    } while (Serial.available() > 0);
+    
+      qu[2]= cadena_leida.toFloat();
+      move_q3(qu[2]);
+      
+  }
   }
   else if (reset1) {
     reset_stepper0();
@@ -893,3 +931,18 @@ void trajectory (float q1, float q2, float q3, float t) {
 void pick_and_place () {
 
 }
+/*
+void pick_and_place (x,y,z,p1,p2,p3) {//version basica 1
+  
+    moveToPoint(p1,p2,p3);
+    opengrip();
+    delay(3000);
+    closegrip();
+    moveToPoint(x,y,z);
+    opengrip();
+    delay(3000);
+    closegrip();
+    delay(2000);
+    gohome();
+}
+*/
