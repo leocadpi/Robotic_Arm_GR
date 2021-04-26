@@ -10,9 +10,9 @@ clear
 clc
 
 % Longitudes de los eslabones
-L1 = 150/100;
-L2 = 155/100;
-L3 = 200/100;
+L1 = 1.50;
+L2 = 1.55;
+L3 = 2.00;
 
 % Conversión de grados a radianes
 k = pi/180;
@@ -23,13 +23,17 @@ A2 = Link([0 0 L2 0]);
 A3 = Link([0 0 L3 0]);
 
 % Vector de Links
-L = [A1 A2 A2];
+L = [A1 A2 A3];
 
 % Información sobre el robot (base del objeto robot)
 robot = SerialLink(L, 'name', 'BrazoRobot')
 
+q1 = 45*k;
+q2 = 60*k;
+q3 = 0*k;
+
 % Coordenadas articulares
-q = [0 -90*k 0]
+q = [q1 q2-90 q3+90]
 
 % NOTA: Hay que poner las coordenadas finales guardando la relación que
 % tienen las articulaciones q2, q3 y q3f !!!
