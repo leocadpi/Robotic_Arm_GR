@@ -28,12 +28,13 @@ L = [A1 A2 A3];
 % Información sobre el robot (base del objeto robot)
 robot = SerialLink(L, 'name', 'BrazoRobot')
 
-q1 = 45*k;
-q2 = 60*k;
-q3 = 0*k;
+q1 = 0*k;
+q2 = 45*k;
+q3 = 30*k;
+q3f = q2 - q3;
 
 % Coordenadas articulares
-q = [q1 q2-90 q3+90]
+q = [q1 q2-90 q3f+90]
 
 % NOTA: Hay que poner las coordenadas finales guardando la relación que
 % tienen las articulaciones q2, q3 y q3f !!!
