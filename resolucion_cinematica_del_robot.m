@@ -29,8 +29,8 @@ L = [A1 A2 A3];
 robot = SerialLink(L, 'name', 'BrazoRobot')
 
 q1 = 0*k;
-q2 = 45*k;
-q3 = 30*k;
+q2 = 0*k;
+q3 = 0*k;
 q3f = q2 - q3;
 
 % Coordenadas articulares
