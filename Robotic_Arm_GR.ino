@@ -784,7 +784,9 @@ Vector3 forwardKinematics (float q1, float q2, float q3) {
 
 // Lleva el extremo a una posición cartesiana x, y, z determinada
 void moveToPoint(float x, float y, float z) {
- 
+  Vector3 el_puto;
+  el_puto = inverseKinematics(x, y, z);
+  moveToAngles(el_puto.x, el_puto.y, el_puto.z);
 }
 
 // Devuelve los valores articulares del robot
