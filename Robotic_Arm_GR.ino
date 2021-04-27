@@ -9,9 +9,14 @@ MePort limitSwitch(PORT_7);
 Servo svs[1] = {Servo()};
 MeStepperOnBoard steppers[3] = {MeStepperOnBoard(PORT_1), MeStepperOnBoard(PORT_2), MeStepperOnBoard(PORT_3)}; 
 
+float qlimit_0[2] = {90.0, -90.0};
+float qlimit_1[2] = {36.0, -32.0};
+float qlimit_2[2] = {52.0, -13.0};
+/*
 float qlimit_0[2] = {0.0, 0.0};
 float qlimit_1[2] = {0.0, 0.0};
 float qlimit_2[2] = {0.0, 0.0};
+*/
 
 struct Vector3 {
   double x;
@@ -88,13 +93,13 @@ void loop() {
       }
   }
 
-  
+  /*
   // Visualización finales de carrera
   sensor1 = digitalRead(pin1);
   Serial.println(sensor1);
   sensor2 = digitalRead(pin2);
   Serial.println(sensor2);
-  
+  */
   
   // Permito corriente a los motores en un movimiento
   long isMoving = 0;
@@ -113,6 +118,7 @@ void loop() {
         steppers[0].setCurrentPosition(lastPositions[0]);
         steppers[1].setCurrentPosition(lastPositions[1]);
         steppers[2].setCurrentPosition(lastPositions[2]);
+         setSpeedConfiguration(currentSpeed, maxSpeed, currentAcceleration);
       }
   }
 }
@@ -312,13 +318,16 @@ void parseBuffer() {
                                    
       delay(5);
     } while (Serial.available() > 0);
-     for (int i = 0; i < cadena_leida.length()+1; i++) {
+     for (int i = 0; i < 3; i++) {
       index = cadena_leida.indexOf(separador);                        // Localizamos espacios dentro de la cadena (desde el pricipio)
       aux = (cadena_leida.substring(0, index));   // Sacamos parte de la cadena desde 0 hasta el espacio encontrado NO INCLUIDO
       ku[i]= aux.toFloat();
       cadena_leida = cadena_leida.substring(index + 1);               // Quitamos el espacio junto con la parte antes del mismo
       
   }
+    Serial.println(ku[0]); 
+     Serial.println(ku[1]); 
+      Serial.println(ku[2]); 
     moveToAngles(ku[0], ku[1], ku[2]);
   }
   }
@@ -331,7 +340,7 @@ void parseBuffer() {
                                    
       delay(5);
     } while (Serial.available() > 0);
-     for (int i = 0; i < cadena_leida.length()+1; i++) {
+     for (int i = 0; i < 3; i++) {
       index = cadena_leida.indexOf(separador);                        // Localizamos espacios dentro de la cadena (desde el pricipio)
       aux = (cadena_leida.substring(0, index));   // Sacamos parte de la cadena desde 0 hasta el espacio encontrado NO INCLUIDO
       ku[i]= aux.toFloat();
@@ -353,13 +362,14 @@ void parseBuffer() {
                                    
         delay(5);
       } while (Serial.available() > 0);
-     for (int i = 0; i < cadena_leida.length()+1; i++) {
+     for (int i = 0; i < 4; i++) {
         index = cadena_leida.indexOf(separador);                        // Localizamos espacios dentro de la cadena (desde el pricipio)
         aux = (cadena_leida.substring(0, index));   // Sacamos parte de la cadena desde 0 hasta el espacio encontrado NO INCLUIDO
         ku[i]= aux.toFloat();
         cadena_leida = cadena_leida.substring(index + 1);               // Quitamos el espacio junto con la parte antes del mismo
-      
-     }
+        Serial.println(ku[i]); 
+      }
+     
      }
      
      trajectory(ku[0], ku[1], ku[2], ku[3]); 
@@ -398,11 +408,12 @@ void parseBuffer() {
                                    
       delay(5);
     } while (Serial.available() > 0);
-     for (int i = 0; i < cadena_leida.length()+1; i++) {
+     for (int i = 0; i < 3; i++) {
       index = cadena_leida.indexOf(separador);                        // Localizamos espacios dentro de la cadena (desde el pricipio)
       aux = (cadena_leida.substring(0, index));   // Sacamos parte de la cadena desde 0 hasta el espacio encontrado NO INCLUIDO
       ku[i]= aux.toFloat();
       cadena_leida = cadena_leida.substring(index + 1);               // Quitamos el espacio junto con la parte antes del mismo
+      Serial.println(ku[i]); 
       
   }
     moveToPoint(ku[0], ku[1], ku[2]);
@@ -826,9 +837,12 @@ void moveToAngles(float q1, float q2, float q3) {
 // Función que devuelve la matriz de transformación T entre Si-1 y Si
 void denavit(float q, float d, float a, float alfa, float t[4][4]) {
 
-  float t1[4][4] = { {cos(q), -cos(alfa)*sin(q), sin(alfa)*sin(q), a*cos(q)},
-                   {sin(q), cos(alfa)*cos(q), -sin(alfa)*cos(q), a*sin(q)},
-                   {0.0, sin(alfa), cos(alfa), d},
+  float qR = q * RADS;
+  float alfaR = alfa * RADS;
+  
+  float t1[4][4] = { {cos(qR), -cos(alfaR)*sin(qR), sin(alfaR)*sin(qR), a*cos(qR)},
+                   {sin(qR), cos(alfaR)*cos(qR), -sin(alfaR)*cos(qR), a*sin(qR)},
+                   {0.0, sin(alfaR), cos(alfaR), d},
                    {0.0, 0.0, 0.0, 1.0} };
 
   
@@ -888,21 +902,28 @@ Vector3 forwardKinematics (float q1, float q2, float q3) {
 void moveToPoint(float x, float y, float z) {
   Vector3 el_puto;
   el_puto = inverseKinematics(x, y, z);
+  Serial.println(el_puto.x);
+  Serial.println(el_puto.y);
+  Serial.println(el_puto.z);
   moveToAngles(el_puto.x, el_puto.y, el_puto.z);
 }
 
 Vector3 inverseKinematics(float x, float y, float z) {
 
   Vector3 resultado;
-  float q1, q2, q3, q3f,beta,alfa,q1d,q2d,q3d;
+  float q1, q2, q3,q3l, q3f,beta,alfa,q1d,q2d,q3d;
     
     q1 = atan(y/x);
     q3 = acos(((z-L1)*(z-L1)+x*x+y*y-L2*L2-L3*L3)/(2*L2*L3));
     q1d = q1*180/3.1415;
+    q3l=q3*180/3.1415-90;
     q2 = atan((z-L1)/-sqrt(x*x+y*y))-atan((L3*sin(q3))/(L2+L3*cos(q3)));
+    
     q3d = q3*180/3.1415-90;
     q2d = q2*180/3.1415+90;
-
+    q3l = q2d-q3d;
+    
+/*
   if(q3d>90 and q3d<180){
     q3d = 180 - q3d;
     
@@ -919,10 +940,10 @@ Vector3 inverseKinematics(float x, float y, float z) {
     q3d = q3d-180;
     
     }
-
+*/
   resultado.x = q1d;
   resultado.y = q2d;
-  resultado.z = q3d;
+  resultado.z = q3l;
   
 
   return resultado;
@@ -945,29 +966,42 @@ void trajectory (float q1, float q2, float q3, float t) {
   d2= (q2*(GEAR_2*STEPS)/1.8) - (steppers[1].currentPosition());
   d3= (q3*(GEAR_2*STEPS)/1.8) - (steppers[2].currentPosition());                                                              
   //Calculamos las aceleraciones
-  a1 = d1*(2/(t*t));     //Formula a partir de la cinemática
-  a2 = d2*(2/(t*t));
-  a3 = d3*(2/(t*t));
-  
   //Calculamos las velocidades que se darian con esta aceleracion
-  v1=  sqrt(2*a1*d1); // La sacamos de cinemática 
-  v2=  sqrt(2*a2*d2);
-  v3=  sqrt(2*a3*d3);
+  v1=  d1/t; // La sacamos de cinemática 
+  v2=  d2/t;
+  v3=  d3/t;
+
+  if(v1<0){
+    v1 = v1*-1;
+  }
+  if(v2<0){
+    v2 = v2*-1;
+  }
+  if(v3<0){
+    v3 = v3*-1;
+  }
+   //Calculamos las aceleraciones
+  a1 = v1/t;     //Formula a partir de la cinemática
+  a2 = v2/t;
+  a3 = v3/t;
   // Filtramos las aceleraciones                                                             
    if((v1 or v2 or v3) > (float)maxSpeed){ //Si las aceleraciones o velocidades superasen el maximo(maxAceleration no existe)
     Serial.println("Debes darle más tiempo, no es tan rápido"); 
    }
    else{ //Si no pues seteamos la aceleracion, velocidad y llamamos a move angles
-    steppers[0].setAcceleration((int)a1);
-    steppers[1].setAcceleration((int)a2);
-    steppers[2].setAcceleration((int)a3);
+    steppers[0].setSpeed(v1);
+    steppers[1].setSpeed(v2);
+    steppers[2].setSpeed(v3);
     
-    steppers[0].setSpeed((int)v1);
-    steppers[1].setSpeed((int)v2);
-    steppers[2].setSpeed((int)v3);
+    
+    steppers[0].setAcceleration(a1);
+    steppers[1].setAcceleration(a2);
+    steppers[2].setAcceleration(a3);
+    
     
     moveToAngles(q1, q2, q3);
     delay(1000);
+    /*
     steppers[0].setAcceleration(currentAcceleration);
     steppers[1].setAcceleration(currentAcceleration);
     steppers[2].setAcceleration(currentAcceleration);
@@ -975,27 +1009,72 @@ void trajectory (float q1, float q2, float q3, float t) {
     steppers[0].setSpeed(currentSpeed);
     steppers[1].setSpeed(currentSpeed);
     steppers[2].setSpeed(currentSpeed);
+    */
    }
 }
 
 // Tarea p&p
 // Realiza una tarea de coger y mover un objeto mediante las funciones desarrolladas
 // en los apartados anteriores
+/*
 void pick_and_place () {
 
-}
-/*
-void pick_and_place (x,y,z,p1,p2,p3) {//version basica 1
-  
-    moveToPoint(p1,p2,p3);
-    opengrip();
-    delay(3000);
-    closegrip();
-    moveToPoint(x,y,z);
-    opengrip();
-    delay(3000);
-    closegrip();
-    delay(2000);
-    gohome();
+
 }
 */
+void pick_and_place () {//version basica 1
+
+  float ku[4],qu[4];
+  char separador = ' ';
+  String aux, cadena_leida = "";
+  int index;
+  
+  /*
+   Serial.println("Introduce X, Y, Z separados por espacios"); 
+   do{ }while(Serial.available()==0); 
+   if (Serial.available() > 0) {                                     // Comprobamos si en el buffer hay datos
+    do {
+      cadena_leida = Serial.readStringUntil('\n');                   // Lee el string uno por uno y se almacena en una variable
+                                   
+      delay(5);
+    } while (Serial.available() > 0);
+     for (int i = 0; i < 3; i++) {
+      index = cadena_leida.indexOf(separador);                        // Localizamos espacios dentro de la cadena (desde el pricipio)
+      aux = (cadena_leida.substring(0, index));   // Sacamos parte de la cadena desde 0 hasta el espacio encontrado NO INCLUIDO
+      ku[i]= aux.toFloat();
+      cadena_leida = cadena_leida.substring(index + 1);               // Quitamos el espacio junto con la parte antes del mismo
+      Serial.print(ku[i]);
+  }
+    
+  }
+  */
+    moveToPoint(208,120 ,227 );
+    open_grip();
+    delay(4000);
+    close_grip();
+  /*
+   Serial.println("Introduce X, Y, Z separados por espacios"); 
+   do{ }while(Serial.available()==0); 
+   if (Serial.available() > 0) {                                     // Comprobamos si en el buffer hay datos
+    do {
+      cadena_leida = Serial.readStringUntil('\n');                   // Lee el string uno por uno y se almacena en una variable
+                                   
+      delay(5);
+    } while (Serial.available() > 0);
+     for (int i = 0; i < 3; i++) {
+      index = cadena_leida.indexOf(separador);                        // Localizamos espacios dentro de la cadena (desde el pricipio)
+      aux = (cadena_leida.substring(0, index));   // Sacamos parte de la cadena desde 0 hasta el espacio encontrado NO INCLUIDO
+      qu[i]= aux.toFloat();
+      cadena_leida = cadena_leida.substring(index + 1);               // Quitamos el espacio junto con la parte antes del mismo
+      
+  }
+   
+  }
+*/
+   moveToPoint(131, -131, 321);
+    open_grip();
+    delay(3000);
+    close_grip();
+    delay(2000);
+    goHome();
+}
