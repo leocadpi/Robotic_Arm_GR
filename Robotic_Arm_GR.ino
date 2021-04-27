@@ -152,6 +152,7 @@ void parseBuffer() {
   bool trayectoria = false;
   bool mAngles = false;
   bool mPoint = false;
+  bool PickPlace = false;
   
   Vector3 pepe;
   float ku[4];
@@ -222,6 +223,10 @@ void parseBuffer() {
 
     else if (tmp.indexOf("mp", 0) > -1){
       mPoint = true;
+    }
+    
+    else if (tmp.indexOf("pp", 0) > -1){
+      PickPlace = true;
     }
     
     count++;
@@ -403,6 +408,13 @@ void parseBuffer() {
     moveToPoint(ku[0], ku[1], ku[2]);
   }
   }
+
+  else if(PickPlace){
+  
+    pick_and_place ();
+
+    
+    }
   Serial.println("OK"); // Está filtrado
   buffer = "";
 }
@@ -813,14 +825,12 @@ void moveToAngles(float q1, float q2, float q3) {
 
 // Función que devuelve la matriz de transformación T entre Si-1 y Si
 void denavit(float q, float d, float a, float alfa, float t[4][4]) {
-  
-  qR = q * RADS;
-  alfaR = alfa * RADS;
-    
-  float t1[4][4] = { {cos(qR), -cos(alfaR)*sin(qR), sin(alfaR)*sin(qR), a*cos(qR)},
-                   {sin(qR), cos(alfaR)*cos(qR), -sin(alfaR)*cos(qR), a*sin(qR)},
-                   {0.0, sin(alfaR), cos(alfaR), d},
+
+  float t1[4][4] = { {cos(q), -cos(alfa)*sin(q), sin(alfa)*sin(q), a*cos(q)},
+                   {sin(q), cos(alfa)*cos(q), -sin(alfa)*cos(q), a*sin(q)},
+                   {0.0, sin(alfa), cos(alfa), d},
                    {0.0, 0.0, 0.0, 1.0} };
+
   
   //t = t1;
    for(int i = 0; i<4 ; i++){
@@ -881,49 +891,38 @@ void moveToPoint(float x, float y, float z) {
   moveToAngles(el_puto.x, el_puto.y, el_puto.z);
 }
 
-// Devuelve los valores articulares del robot
 Vector3 inverseKinematics(float x, float y, float z) {
 
-  // Función int Invert(mtx_type* A, int n);
-
   Vector3 resultado;
+  float q1, q2, q3, q3f,beta,alfa,q1d,q2d,q3d;
+    
+    q1 = atan(y/x);
+    q3 = acos(((z-L1)*(z-L1)+x*x+y*y-L2*L2-L3*L3)/(2*L2*L3));
+    q1d = q1*180/3.1415;
+    q2 = atan((z-L1)/-sqrt(x*x+y*y))-atan((L3*sin(q3))/(L2+L3*cos(q3)));
+    q3d = q3*180/3.1415-90;
+    q2d = q2*180/3.1415+90;
 
-  float q1, q2, q3;
+  if(q3d>90 and q3d<180){
+    q3d = 180 - q3d;
+    
+    }
+   else if(q2d>90 and q2d<180){
+    q2d = 180 - q2d;
+    
+    }
+    else if(q2d>180 and q2d<270){
+    q2d = q2d-180;
+    
+    }
+    else if(q3d>180 and q3d<270){
+    q3d = q3d-180;
+    
+    }
 
-
-
-
-  //////////////////////////////////////////////////// ???
-  // Q = q1 + q2 + q3
-
-  // q1 = arctg(y / x)
-  // q2 = beta - alfa
-  // q3 = arctg(± (1 - cos²(q3))½ / cos(q3))
-
-  // R = sqrt(x^2 + y^2)
-
-  // beta = arctg(z / R)
-  // alfa = arctg(L3 * sin(q3) / (L2 + L3 * cos(q3)))
-  ////////////////////////////////////////////////////
-  /*
-    q1 = arctg(y/x);
-    q2 = q2 = beta - alfa
-    q3 = (y^2 + (z - L1)^2 - L2^2 - L3^2)/(2*L2*L3)  
-  
-    beta = arctg(y / z - L1)
-    alfa = arctg(L3 * sin(q3) / (L2 + L3 * cos(q3)))
-  
-    Estas formulas salen de un ejercicio de los pdf de teoría, lo único que varía 
-    Es que q1 en este caso también es rotacional
-  
-  */
-  /////////////////////////////////////////////////////
-  //La diferencia entre la forma de arriba y la de abajo creo que se cual es, ya la discutiremos
-  //Mucho texto para explicar por aquí
-  
-  //resultado.x = q1;
-  //resultado.y = q2;
-  //resultado.z = q3;
+  resultado.x = q1d;
+  resultado.y = q2d;
+  resultado.z = q3d;
   
 
   return resultado;
