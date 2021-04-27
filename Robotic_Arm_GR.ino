@@ -148,8 +148,10 @@ void parseBuffer() {
   bool sHome = false;
   bool gHome = false;
   bool fkinematics = false;
+  bool ikinematics = false;
   bool trayectoria = false;
   bool mAngles = false;
+  bool mPoint = false;
   
   Vector3 pepe;
   float ku[4];
@@ -212,6 +214,14 @@ void parseBuffer() {
     
     else if (tmp.indexOf("fkin", 0) > -1){
       fkinematics = true;
+    }
+    
+    else if (tmp.indexOf("ikin", 0) > -1){
+      ikinematics = true;
+    }
+
+    else if (tmp.indexOf("mp", 0) > -1){
+      mPoint = true;
     }
     
     count++;
@@ -350,7 +360,49 @@ void parseBuffer() {
      trajectory(ku[0], ku[1], ku[2], ku[3]); 
     
     }
-  
+
+    else if(ikinematics){
+     Serial.println("Introduce x, y, z separados por espacios"); 
+     do{ }while(Serial.available()==0);                             //Esperamos a que se introduzcan datos
+     if (Serial.available() > 0) {                                     // Comprobamos si en el buffer hay datos
+     do {
+      cadena_leida = Serial.readStringUntil('\n');                   // Lee el string uno por uno y se almacena en una variable
+                                   
+      delay(5);
+    } while (Serial.available() > 0);
+     for (int i = 0; i < cadena_leida.length()+1; i++) {
+      index = cadena_leida.indexOf(separador);                        // Localizamos espacios dentro de la cadena (desde el pricipio)
+      aux = (cadena_leida.substring(0, index));   // Sacamos parte de la cadena desde 0 hasta el espacio encontrado NO INCLUIDO
+      ku[i]= aux.toFloat();
+      cadena_leida = cadena_leida.substring(index + 1);               // Quitamos el espacio junto con la parte antes del mismo
+      
+    }
+      pepe = inverseKinematics(ku[0], ku[1], ku[2]);
+      Serial.print("q1: "); Serial.print(pepe.x); 
+      Serial.print("   q2: "); Serial.print(pepe.y);
+      Serial.print("   q3: "); Serial.println(pepe.z);
+  }
+  }
+
+  else if (mPoint) {
+   Serial.println("Introduce X, Y, Z separados por espacios"); 
+   do{ }while(Serial.available()==0); 
+   if (Serial.available() > 0) {                                     // Comprobamos si en el buffer hay datos
+    do {
+      cadena_leida = Serial.readStringUntil('\n');                   // Lee el string uno por uno y se almacena en una variable
+                                   
+      delay(5);
+    } while (Serial.available() > 0);
+     for (int i = 0; i < cadena_leida.length()+1; i++) {
+      index = cadena_leida.indexOf(separador);                        // Localizamos espacios dentro de la cadena (desde el pricipio)
+      aux = (cadena_leida.substring(0, index));   // Sacamos parte de la cadena desde 0 hasta el espacio encontrado NO INCLUIDO
+      ku[i]= aux.toFloat();
+      cadena_leida = cadena_leida.substring(index + 1);               // Quitamos el espacio junto con la parte antes del mismo
+      
+  }
+    moveToPoint(ku[0], ku[1], ku[2]);
+  }
+  }
   Serial.println("OK"); // Está filtrado
   buffer = "";
 }
