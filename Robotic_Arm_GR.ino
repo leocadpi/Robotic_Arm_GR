@@ -813,12 +813,14 @@ void moveToAngles(float q1, float q2, float q3) {
 
 // Función que devuelve la matriz de transformación T entre Si-1 y Si
 void denavit(float q, float d, float a, float alfa, float t[4][4]) {
-
-  float t1[4][4] = { {cos(q), -cos(alfa)*sin(q), sin(alfa)*sin(q), a*cos(q)},
-                   {sin(q), cos(alfa)*cos(q), -sin(alfa)*cos(q), a*sin(q)},
-                   {0.0, sin(alfa), cos(alfa), d},
+  
+  qR = q * RADS;
+  alfaR = alfa * RADS;
+    
+  float t1[4][4] = { {cos(qR), -cos(alfaR)*sin(qR), sin(alfaR)*sin(qR), a*cos(qR)},
+                   {sin(qR), cos(alfaR)*cos(qR), -sin(alfaR)*cos(qR), a*sin(qR)},
+                   {0.0, sin(alfaR), cos(alfaR), d},
                    {0.0, 0.0, 0.0, 1.0} };
-
   
   //t = t1;
    for(int i = 0; i<4 ; i++){
