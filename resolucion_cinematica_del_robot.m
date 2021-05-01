@@ -1,13 +1,9 @@
 % PRÁCTICA 2
 
-% Cálculo de la cinemática directa e inversa
-
-% ???
-% Para la herramienta (matriz tool de la RT) tipo pinza, considerar
-% una transformación de Z=-45mm, X=65mm respecto del extremo del robot
-
-clear
 clc
+clear
+
+%-------------- Cálculo de la cinemática directa e inversa --------------%
 
 % Longitudes de los eslabones
 L1 = 1.50;
@@ -17,33 +13,58 @@ L3 = 2.00;
 % Conversión de grados a radianes
 k = pi/180;
 
-% Definición de las articulaciones (q_3f = q_2 - q_3)
-A1 = Link([0 L1 0 -90*k]);
-A2 = Link([0 0 L2 0]);
-A3 = Link([0 0 L3 0]);
+% Definición de las articulaciones
+L(1) = Link([0 L1 0 -90*k]);
+L(2) = Link([-90*k 0 L2 0]);
+L(3) = Link([90*k 0 L3 0]);
 
-% Vector de Links
-L = [A1 A2 A3];
-
-% Información sobre el robot (base del objeto robot)
-robot = SerialLink(L, 'name', 'BrazoRobot')
-
-q1 = 0*k;
-q2 = 0*k;
-q3 = 0*k;
-q3f = q2 - q3;
+% Base del objeto robot
+robot = SerialLink(L,'name','BrazoRobot')
 
 % Coordenadas articulares
-q = [q1 q2-90 q3f+90]
+q1 = 0;
+q2 = 30;
+q3 = 60;
+q3f = q2-q3;
 
-% NOTA: Hay que poner las coordenadas finales guardando la relación que
-% tienen las articulaciones q2, q3 y q3f !!!
+q = [q1*k q2*k q3f*k]
 
-% Cinemática directa 1
+% Cinemática directa
 T = robot.fkine(q)
 
 % Cinemática inversa
-q_inversa = robot.ikunc(T)      % Coincide con la q principal
+q_inv = robot.ikunc(T)                                      % En radianes
+q_inv_grad = [q_inv(1)/k q_inv(2)/k (q_inv(2)-q_inv(3))/k]  % En grados
+
+% Dibujo del robot
+% robot.plot(q)
+
+%------------------------ Herramienta tipo pinza ------------------------%
+
+% Coordenadas de la pinza respecto al extremo del robot
+z = -0.45;
+x = 0.65;
+
+% Matriza de transformación homogénea
+T_pinza = transl(x,0,z)
+
+% Base del objeto robot
+robot = SerialLink(L,'name','BrazoRobot','tool',T_pinza)
+
+% Cinemática directa
+T = robot.fkine(q)
+
+% Cinemática inversa
+q_inv = robot.ikunc(T)                                      % En radianes
+q_inv_grad = [q_inv(1)/k q_inv(2)/k (q_inv(2)-q_inv(3))/k]  % En grados
 
 % Dibujo del robot
 robot.plot(q)
+
+%------------------------------------------------------------------------%
+
+% syms th1 th2 th3 th4 th5
+% Rob.fkine([th1 th2 th3 th4 th5])
+% Rob.fkine([ q1 q2 q3 q4 q5 ])
+
+% robot.teach()
