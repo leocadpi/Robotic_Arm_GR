@@ -23,8 +23,8 @@ robot = SerialLink(L,'name','BrazoRobot')
 
 % Coordenadas articulares
 q1 = 0;
-q2 = 30;
-q3 = 60;
+q2 = 45;
+q3 = 90;
 q3f = q2-q3;
 
 q = [q1*k q2*k q3f*k]
@@ -63,8 +63,4 @@ robot.plot(q)
 
 %------------------------------------------------------------------------%
 
-% syms th1 th2 th3 th4 th5
-% Rob.fkine([th1 th2 th3 th4 th5])
-% Rob.fkine([ q1 q2 q3 q4 q5 ])
-
-% robot.teach()
+robot.teach()
