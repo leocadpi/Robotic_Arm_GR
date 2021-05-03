@@ -6,9 +6,9 @@ clear
 %-------------- Cálculo de la cinemática directa e inversa --------------%
 
 % Longitudes de los eslabones
-L1 = 1.50;
-L2 = 1.55;
-L3 = 2.00;
+L1 = 150;
+L2 = 155;
+L3 = 200;
 
 % Conversión de grados a radianes
 k = pi/180;
@@ -19,7 +19,7 @@ L(2) = Link([-90*k 0 L2 0]);
 L(3) = Link([90*k 0 L3 0]);
 
 % Base del objeto robot
-robot = SerialLink(L,'name','BrazoRobot')
+robot = SerialLink(L,'name','Planar3gdl')
 
 % Coordenadas articulares
 q1 = 0;
@@ -42,8 +42,8 @@ q_inv_grad = [q_inv(1)/k q_inv(2)/k (q_inv(2)-q_inv(3))/k]  % En grados
 %------------------------ Herramienta tipo pinza ------------------------%
 
 % Coordenadas de la pinza respecto al extremo del robot
-z = -0.45;
-x = 0.65;
+z = -45;
+x = 65;
 
 % Matriza de transformación homogénea
 T_pinza = transl(x,0,z)
